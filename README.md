@@ -46,8 +46,8 @@ No vector database, no reranking, no observations/summaries — just raw message
 
 | Embed Model | K | MR | Answerer | LongMemEval Judge |
 |-------------|---|----|----------|-------------------|
-| **OAI text-embedding-3-small** | **50** | **±1** | **gemini-3-flash** | **84.2%** |
-| Mastra (reported) | ? | ? | gemini-3-flash | 79.7% |
+| OAI text-embedding-3-small | 50 | ±1 | gemini-3-flash | 84.2% |
+| Mastra (reported) | 50 | ±1 | gemini-3-flash | 79.7% |
 
 ### Retrieval Parameters
 
@@ -77,7 +77,7 @@ Generic = inline "is this correct?" judge. LongMemEval = official per-type promp
 
 | Prompt | Generic | LongMemEval |
 |--------|---------|-------------|
-| **Terse** ("Give ONLY the answer — a number, name, or short phrase") | **84.2%** | **84.2%** |
+| Terse ("Give ONLY the answer — a number, name, or short phrase") | 84.2% | 84.2% |
 | Verbose ("Answer concisely using ONLY the observations") | 85.7% | 79.7% |
 | Mastra's exact prompt ("helpful assistant with conversation history") | 82.0% | 77.4% |
 
@@ -131,7 +131,7 @@ Of 27 wrong answers (out of 133):
 | Hallucination on abstention | 1 | Model answered when it should say "I don't know" |
 | Wrong count/reasoning | 10 | Found evidence but computed wrong number |
 
-See `results/error_analysis.md` for per-question details.
+See [error_analysis.md](error_analysis.md) for per-question details.
 
 ## Script
 
