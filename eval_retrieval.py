@@ -10,18 +10,18 @@ For each question:
 Usage:
     # Best config: K=50, message-range=±1, terse prompt
     python3 scripts/eval_retrieval.py \
-        --dataset LongMemEval/data/longmemeval_s_cleaned.json \
+        --dataset data/longmemeval_s.json \
         --question-type multi-session
 
     # Also run strict LongMemEval judge (GPT-4o) in one command
     python3 scripts/eval_retrieval.py \
-        --dataset LongMemEval/data/longmemeval_s_cleaned.json \
+        --dataset data/longmemeval_s.json \
         --question-type multi-session \
         --judge openai --judge-model gpt-4o
 
     # Re-score existing hypotheses with strict judge only (no retrieval)
     python3 scripts/eval_retrieval.py \
-        --dataset LongMemEval/data/longmemeval_s_cleaned.json \
+        --dataset data/longmemeval_s.json \
         --hypotheses results/hypotheses_small_k50_mr1.jsonl \
         --judge openai --judge-model gpt-4o
 """
@@ -99,7 +99,7 @@ def _embed_texts_openai(
                 all_embeddings.extend([d.embedding for d in sorted_data])
                 break
             except Exception as e:
-                if attempt < max_retries - 1 and ("429" in str(e) or "rate" in str(e).lower()):
+                if attempt < max_retries - 1 and ("429" in str(e) or "rate" in str(e).lower() or "500" in str(e) or "server_error" in str(e).lower()):
                     time.sleep(2 ** attempt + 1)
                 else:
                     raise
@@ -796,6 +796,48 @@ class ExactAttentionRetriever:
         return self._rank_packed(messages, query)
 
 
+class ColBERTRetriever:
+    """Late-interaction retriever using ColBERT multi-vector scoring."""
+
+    def __init__(self, model_name: str, device: str, batch_size: int):
+        from pylate import models, rank
+
+        self.rank_module = rank
+        self.model_name = model_name
+        self.batch_size = batch_size
+
+        if device == "auto":
+            try:
+                import torch
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+            except ImportError:
+                device = "cpu"
+
+        self.model = models.ColBERT(model_name_or_path=model_name, device=device)
+        self.model.half()
+
+    def rank(self, messages: list[Message], query: str) -> tuple[list[int], dict]:
+        if not messages:
+            return [], {}
+
+        doc_texts = [m.text for m in messages]
+        doc_ids = [m.id for m in messages]
+
+        query_embeddings = self.model.encode([query], is_query=True, batch_size=1)
+        doc_embeddings = self.model.encode(
+            doc_texts, is_query=False, batch_size=self.batch_size
+        )
+
+        reranked = self.rank_module.rerank(
+            documents_ids=[doc_ids],
+            queries_embeddings=query_embeddings,
+            documents_embeddings=[doc_embeddings],
+        )
+        ranking = [entry["id"] for entry in reranked[0]]
+        diag = {"retriever": "colbert", "model": self.model_name}
+        return ranking, diag
+
+
 def _session_hit(
     msg_by_id: dict[int, Message],
     ranked_ids: list[int],
@@ -951,14 +993,20 @@ def _llm_call(client, model, messages, max_tokens, max_retries=8):
 
 def answer_and_judge(
     top_messages: list[Message], oracle_entry: dict, client, model: str,
+    obs_char_limit: int = 500,
 ) -> tuple[str, bool]:
     """Give retrieved messages to LLM, get answer, judge correctness."""
     question = oracle_entry["question"]
     answer = str(oracle_entry["answer"])
 
-    obs_text = "\n".join(
-        f"[{i+1}] {m.text[:500]}" for i, m in enumerate(top_messages)
-    )
+    if obs_char_limit > 0:
+        obs_text = "\n".join(
+            f"[{i+1}] {m.text[:obs_char_limit]}" for i, m in enumerate(top_messages)
+        )
+    else:
+        obs_text = "\n".join(
+            f"[{i+1}] {m.text}" for i, m in enumerate(top_messages)
+        )
     prompt = ANSWER_PROMPT.format(observations=obs_text, question=question)
 
     try:
@@ -1026,11 +1074,21 @@ def _run_strict_judge(
     """Run strict LongMemEval judge on hypotheses. Returns {qid: correct}."""
     from openai import OpenAI
 
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        print("OPENAI_API_KEY not set (needed for strict judge).", file=sys.stderr)
-        sys.exit(1)
-    client = OpenAI(api_key=api_key)
+    if "gemini" in judge_model:
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            print("GEMINI_API_KEY not set (needed for strict judge).", file=sys.stderr)
+            sys.exit(1)
+        client = OpenAI(
+            api_key=api_key,
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        )
+    else:
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            print("OPENAI_API_KEY not set (needed for strict judge).", file=sys.stderr)
+            sys.exit(1)
+        client = OpenAI(api_key=api_key)
 
     # Load eval cache
     cache: dict[str, bool] = {}
@@ -1063,9 +1121,10 @@ def _run_strict_judge(
                 resp = client.chat.completions.create(
                     model=judge_model,
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=16, temperature=0,
+                    max_tokens=256, temperature=0,
                 )
-                response = resp.choices[0].message.content.strip()
+                response = resp.choices[0].message.content or ""
+                response = response.strip()
                 label = "yes" in response.lower()
             except Exception as exc:
                 response = str(exc)
@@ -1105,10 +1164,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("--dataset", type=Path, required=True,
-                        help="LongMemEval dataset JSON (e.g. longmemeval_s_cleaned.json)")
+    parser.add_argument("--dataset", type=Path, default=Path("data/longmemeval_s.json"),
+                        help="LongMemEval dataset JSON (default: data/longmemeval_s.json)")
     parser.add_argument("--retriever", default="embedding",
-                        choices=["embedding", "exact_attn_oracle", "exact_attn_tiled_ref"],
+                        choices=["embedding", "exact_attn_oracle", "exact_attn_tiled_ref", "colbert"],
                         help="Retriever backend (default: embedding)")
     parser.add_argument("--embed-model", default="text-embedding-3-small",
                         help="Embedding model (OpenAI text-embedding-3-* or Cohere embed-*)")
@@ -1138,6 +1197,12 @@ def main():
                         help="Exact attention scoring mode: full-coverage per_message or packed context")
     parser.add_argument("--attn-micro-batch", type=int, default=8,
                         help="Micro-batch size for per_message exact attention scoring")
+    parser.add_argument("--colbert-model", default="lightonai/ColBERT-Zero",
+                        help="ColBERT model name or path (default: lightonai/ColBERT-Zero)")
+    parser.add_argument("--colbert-device", default="auto",
+                        help='Device for ColBERT retriever ("auto", "cuda", or "cpu")')
+    parser.add_argument("--colbert-batch-size", type=int, default=64,
+                        help="Batch size for ColBERT document encoding (default: 64)")
     parser.add_argument("--answerer", default="gemini-3-flash-preview",
                         help="LLM model for answering + inline judging")
     parser.add_argument("--retrieval-k", type=int, default=50,
@@ -1150,6 +1215,8 @@ def main():
                         help="Run a single question")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--max-workers", type=int, default=8)
+    parser.add_argument("--obs-char-limit", type=int, default=500,
+                        help="Truncate each observation to N chars (0=no limit, default: 500)")
     parser.add_argument("--scorer-rpm", type=int, default=0,
                         help="Rate limit LLM calls (requests/min, 0=unlimited)")
     parser.add_argument("--results-dir", type=Path, default=Path("results"))
@@ -1157,8 +1224,8 @@ def main():
                         help="Override output path")
     parser.add_argument("--judge", default=None,
                         help='Strict LongMemEval judge: "openai" for OpenAI API')
-    parser.add_argument("--judge-model", default="gpt-4o",
-                        help="Model for strict judge (default: gpt-4o)")
+    parser.add_argument("--judge-model", default="gemini-3-flash-preview",
+                        help="Model for strict judge (default: gemini-3-flash-preview)")
     parser.add_argument("--hypotheses", type=Path, default=None,
                         help="Re-score existing hypotheses file (skip retrieval)")
     parser.add_argument("--retrieval-only", action="store_true",
@@ -1198,6 +1265,8 @@ def main():
     # Output paths
     if args.retriever == "embedding":
         run_tag = args.embed_model.replace("text-embedding-3-", "").replace("/", "_")
+    elif args.retriever == "colbert":
+        run_tag = f"colbert_{args.colbert_model.replace('/', '_')}"
     else:
         run_tag = f"{args.retriever}_{args.attn_model.replace('/', '_')}"
 
@@ -1205,7 +1274,8 @@ def main():
         out_jsonl = args.output
     else:
         args.results_dir.mkdir(parents=True, exist_ok=True)
-        out_jsonl = args.results_dir / f"eval_{run_tag}_k{args.retrieval_k}_mr{args.message_range}.jsonl"
+        obs_tag = f"_obs{args.obs_char_limit}" if args.obs_char_limit != 500 else ""
+        out_jsonl = args.results_dir / f"eval_{run_tag}_k{args.retrieval_k}_mr{args.message_range}{obs_tag}.jsonl"
     hyp_stem = out_jsonl.stem.replace("eval_", "hypotheses_")
     if hyp_stem == out_jsonl.stem:
         hyp_stem = out_jsonl.stem + "_hypotheses"
@@ -1260,7 +1330,17 @@ def main():
     embed_cache_dir = args.results_dir / "embed_cache"
 
     exact_retriever = None
-    if args.retriever != "embedding":
+    colbert_retriever = None
+    if args.retriever == "colbert":
+        if args.max_workers > 1:
+            print("ColBERT retriever uses GPU; forcing --max-workers=1.")
+            args.max_workers = 1
+        colbert_retriever = ColBERTRetriever(
+            model_name=args.colbert_model,
+            device=args.colbert_device,
+            batch_size=args.colbert_batch_size,
+        )
+    elif args.retriever != "embedding":
         if args.max_workers > 1:
             print("Exact attention retrievers are single-worker; forcing --max-workers=1.")
             args.max_workers = 1
@@ -1287,6 +1367,8 @@ def main():
     print(f"Retriever: {args.retriever}")
     if args.retriever == "embedding":
         print(f"Embedding model: {args.embed_model}")
+    elif args.retriever == "colbert":
+        print(f"ColBERT model: {args.colbert_model}")
     else:
         print(
             "Attention model: "
@@ -1322,6 +1404,8 @@ def main():
                 cache_dir=embed_cache_dir, question_id=qid,
             )
             retriever_diag = {"retriever": "embedding"}
+        elif args.retriever == "colbert":
+            ranking, retriever_diag = colbert_retriever.rank(messages, oracle["question"])
         else:
             ranking, retriever_diag = exact_retriever.rank(messages, oracle["question"])
 
@@ -1329,6 +1413,16 @@ def main():
         topk_session_hit = _session_hit(
             msg_by_id, topk_ids, oracle.get("answer_session_ids", [])
         )
+
+        # Oracle message precision/recall
+        answer_sessions = set(oracle.get("answer_session_ids", []))
+        oracle_msg_ids = {m.id for m in messages if m.session_id in answer_sessions}
+        n_oracle_msgs = len(oracle_msg_ids)
+        topk_oracle_hits = sum(1 for mid in topk_ids if mid in oracle_msg_ids)
+        topk_precision = topk_oracle_hits / len(topk_ids) if topk_ids else 0.0
+        topk_recall = topk_oracle_hits / n_oracle_msgs if n_oracle_msgs else 0.0
+        max_recall = min(len(topk_ids), n_oracle_msgs) / n_oracle_msgs if n_oracle_msgs else 0.0
+        norm_recall = (topk_recall / max_recall) if max_recall > 0 else 0.0
 
         # Expand with message range.
         expanded_ids = topk_ids
@@ -1352,15 +1446,22 @@ def main():
         if not args.retrieval_only:
             llm_answer, correct = answer_and_judge(
                 top_messages, oracle, scorer_client, model=args.answerer,
+                obs_char_limit=args.obs_char_limit,
             )
 
         with write_lock:
             counter[0] += 1
             if args.retrieval_only:
-                status = "HIT" if expanded_session_hit else "MISS"
+                hit = "HIT" if expanded_session_hit else "MISS"
+                print(
+                    f"[{counter[0]}/{len(question_ids)}] {qid}  {hit}"
+                    f"  P={topk_precision:.2f} R={topk_recall:.2f} MaxR={max_recall:.2f} R/MaxR={norm_recall:.2f}"
+                    f"  ({topk_oracle_hits}/{n_oracle_msgs} oracle msgs)",
+                    flush=True,
+                )
             else:
                 status = "OK" if bool(correct) else "WRONG"
-            print(f"[{counter[0]}/{len(question_ids)}] {qid}  {status}", flush=True)
+                print(f"[{counter[0]}/{len(question_ids)}] {qid}  {status}", flush=True)
 
         result = {
             "question_id": qid,
@@ -1368,6 +1469,13 @@ def main():
             "question": oracle["question"],
             "answer": str(oracle["answer"]),
             "n_messages": len(messages),
+            "topk_ids": topk_ids,
+            "n_oracle_msgs": n_oracle_msgs,
+            "topk_oracle_hits": topk_oracle_hits,
+            "topk_precision": round(topk_precision, 4),
+            "topk_recall": round(topk_recall, 4),
+            "max_recall": round(max_recall, 4),
+            "norm_recall": round(norm_recall, 4),
             "topk_session_hit": topk_session_hit,
             "expanded_session_hit": expanded_session_hit,
             "retriever_diag": retriever_diag,
@@ -1413,11 +1521,19 @@ def main():
     topk_hit_pct = n_topk_hit / len(results) * 100 if results else 0
     expanded_hit_pct = n_expanded_hit / len(results) * 100 if results else 0
 
+    avg_precision = sum(r.get("topk_precision", 0) for r in results) / len(results) if results else 0
+    avg_recall = sum(r.get("topk_recall", 0) for r in results) / len(results) if results else 0
+    avg_max_recall = sum(r.get("max_recall", 0) for r in results) / len(results) if results else 0
+    avg_norm_recall = sum(r.get("norm_recall", 0) for r in results) / len(results) if results else 0
+
     print(f"\nOracle session-hit@{args.retrieval_k}: {n_topk_hit}/{len(results)} = {topk_hit_pct:.1f}%")
     print(
         "Oracle session-hit after message-range expansion: "
         f"{n_expanded_hit}/{len(results)} = {expanded_hit_pct:.1f}%"
     )
+    print(f"Oracle msg precision@{args.retrieval_k}: {avg_precision:.3f}")
+    print(f"Oracle msg recall@{args.retrieval_k}: {avg_recall:.3f}  (max possible: {avg_max_recall:.3f})")
+    print(f"Oracle msg R/MaxR@{args.retrieval_k}: {avg_norm_recall:.3f}")
     print(f"Elapsed: {elapsed:.1f}s")
     print(f"Results: {out_jsonl}")
 
