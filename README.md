@@ -14,77 +14,88 @@ pip install openai python-dotenv requests
 echo "OPENAI_API_KEY=sk-..." > .env
 echo "GEMINI_API_KEY=..." >> .env
 
-# Clone LongMemEval dataset
+# Download LongMemEval dataset
 git clone https://github.com/xiaowu0162/LongMemEval.git
+mkdir -p data
+cp LongMemEval/data/longmemeval_s_cleaned.json data/longmemeval_s.json
 
-# Run best config + strict LongMemEval judge in one command
-python3 eval_retrieval.py \
-    --dataset LongMemEval/data/longmemeval_s_cleaned.json \
-    --question-type multi-session \
-    --judge openai --judge-model gpt-4o
+# Run eval (embedding retriever, default config)
+python3 eval_retrieval.py --question-type multi-session --obs-char-limit 0
 
-# Or re-score existing hypotheses with strict judge only
-python3 eval_retrieval.py \
-    --dataset LongMemEval/data/longmemeval_s_cleaned.json \
-    --hypotheses results/hypotheses_small_k50_mr1.jsonl \
-    --judge openai --judge-model gpt-4o
+# Run eval with ColBERT-Zero retriever
+pip install pylate  # requires Python ≤3.12
+python3 eval_retrieval.py --retriever colbert --question-type multi-session --obs-char-limit 0
+
+# Add strict LongMemEval judge
+python3 eval_retrieval.py --question-type multi-session --obs-char-limit 0 --judge openai
 ```
 
 ## Method
 
-1. **Embed** all ~500 messages per question with `text-embedding-3-small`
-2. **Rank** by cosine similarity to the question
-3. **Expand** top-50 hits with ±1 surrounding messages for conversational context
-4. **Answer** with gemini-3-flash-preview using a terse prompt ("Give ONLY the answer")
-5. **Judge** with GPT-4o using LongMemEval's official per-question-type prompts
+1. **Retrieve** all ~500 messages per question using either:
+   - `text-embedding-3-small` embeddings ranked by cosine similarity, or
+   - [ColBERT-Zero](https://huggingface.co/lightonai/ColBERT-Zero) late-interaction multi-vector scoring
+2. **Expand** top-K hits with ±N surrounding messages for conversational context
+3. **Answer** with gemini-3-flash-preview using a terse prompt ("Give ONLY the answer")
+4. **Judge** with LongMemEval's official per-question-type prompts
 
-No vector database, no reranking, no observations/summaries — just raw messages + embeddings.
+No vector database, no reranking, no observations/summaries — just raw messages + retrieval.
 
 ## Results
 
-### Best Configuration
+### Best Configuration (LongMemEval strict judge, GPT-4o)
 
-| Embed Model | K | MR | Answerer | LongMemEval Judge |
-|-------------|---|----|----------|-------------------|
-| OAI text-embedding-3-small | 50 | ±1 | gemini-3-flash | 84.2% |
-| Mastra (reported) | 50 | ±1 | gemini-3-flash | 79.7% |
+| Retriever | K | MR | Obs | Answerer | Accuracy |
+|-----------|---|----|-----|----------|----------|
+| OAI small | 50 | ±1 | 500 | gemini-3-flash | **84.2%** |
+| Mastra (reported) | 50 | ±1 | — | — | 79.7% |
 
-### Retrieval Parameters
+GPT-4o is now deprecated. Newer runs below use gemini-3-flash as judge.
 
-| Embed Model | K | MR | Rerank | Answerer | Generic | LongMemEval |
-|-------------|---|----|--------|----------|---------|-------------|
-| OAI small | 50 | ±1 | — | gemini-3-flash | 85.7% | 79.7%* |
-| OAI small | 100 | ±1 | — | gemini-3-flash | 85.0% | 78.9% |
-| OAI small | 50 | ±1 | Cohere rerank-v3.5 | gemini-3-flash | 83.5% | 76.7% |
-| OAI small | 50 | ±2 | — | gemini-3-flash | 82.0% | 76.7% |
-| OAI small | 50 | 0 | — | gemini-3-flash | 82.0% | 75.2% |
-| OAI small | 10 | 0 | — | gemini-3-flash | 72.2% | 70.7% |
+### Retriever Comparison (gemini-3-flash answerer)
 
-*With verbose answerer prompt. Terse prompt raises this to 84.2%.
+| Retriever | K | MR | Obs | Generic | Strict† |
+|-----------|---|----|-----|---------|---------|
+| ColBERT-Zero | 50 | ±1 | full | 88.0% | 89.5% |
+| OAI small | 50 | ±1 | full | 86.5% | 88.0% |
+| OAI small | 20 | 0 | full | 87.2% | — |
+| ColBERT-Zero | 20 | 0 | full | 85.0% | — |
+| ColBERT-Zero | 50 | ±1 | 500 | 87.2% | — |
+| OAI small | 50 | ±1 | 500 | 85.0% | — |
+| Cohere embed-v4.0 | 50 | ±1 | 500 | 82.7% | — |
+| Yuan-embedding-2.0 (local) | 50 | ±1 | 500 | 82.7% | — |
+
+†Strict judge = gemini-3-flash-preview (scores higher than GPT-4o; not directly comparable to above).
+
+### Retrieval Parameters (OAI small, gemini-3-flash answerer, obs=500)
+
+| K | MR | Rerank | Generic | LongMemEval* |
+|---|----|--------|---------|--------------|
+| 50 | ±1 | — | 85.7% | 84.2% |
+| 100 | ±1 | — | 85.0% | 78.9% |
+| 50 | ±1 | Cohere rerank-v3.5 | 83.5% | 76.7% |
+| 50 | ±2 | — | 82.0% | 76.7% |
+| 50 | 0 | — | 82.0% | 75.2% |
+| 10 | 0 | — | 72.2% | 70.7% |
+
+*LongMemEval = official per-type prompts + GPT-4o judge (now deprecated).
 
 K = number of top messages retrieved. MR = message range (±N surrounding messages).
-Generic = inline "is this correct?" judge. LongMemEval = official per-type prompts + GPT-4o.
+Obs = observation char limit per message (500 = truncated, full = no limit).
+Generic = inline "is this correct?" judge.
 
-### Embedding Models (K=50 MR=±1, gemini-3-flash answerer)
+### Answerer Prompt (K=50 MR=±1, OAI small, gemini-3-flash, obs=500)
 
-| Embed Model | Generic | LongMemEval |
-|-------------|---------|-------------|
-| OAI text-embedding-3-small | 85.7% | 79.7% |
-| Cohere embed-v4.0 | 82.7% | 79.7% |
-| Yuan-embedding-2.0-en (local) | 82.7% | 75.2% |
-
-### Answerer Prompt (K=50 MR=±1, OAI small, gemini-3-flash)
-
-| Prompt | Generic | LongMemEval |
-|--------|---------|-------------|
+| Prompt | Generic | LongMemEval* |
+|--------|---------|--------------|
 | Terse ("Give ONLY the answer — a number, name, or short phrase") | 84.2% | 84.2% |
 | Verbose ("Answer concisely using ONLY the observations") | 85.7% | 79.7% |
 | Mastra's exact prompt ("helpful assistant with conversation history") | 82.0% | 77.4% |
 
-### Answerer Date Enhancements (K=50 MR=±1, OAI small) — All Hurt
+### Answerer Date Enhancements (K=50 MR=±1, OAI small, obs=500) — All Hurt
 
-| Enhancement | Generic | LongMemEval |
-|-------------|---------|-------------|
+| Enhancement | Generic | LongMemEval* |
+|-------------|---------|--------------|
 | None (baseline) | 85.7% | 79.7% |
 | + date context headers | 79.7% | 78.2% |
 | + date gap markers | 79.7% | 78.2% |
@@ -139,14 +150,18 @@ Single script handles everything: retrieval, answering, and strict judging.
 
 ```
 eval_retrieval.py
-    --dataset           LongMemEval dataset JSON (required)
+    --dataset           LongMemEval dataset JSON (default: data/longmemeval_s.json)
+    --retriever         Retriever: embedding, colbert (default: embedding)
     --question-type     Filter by type (e.g. multi-session)
     --embed-model       Embedding model (default: text-embedding-3-small)
+    --colbert-model     ColBERT model (default: lightonai/ColBERT-Zero)
     --answerer          LLM answerer (default: gemini-3-flash-preview)
     --retrieval-k       Top-K messages to retrieve (default: 50)
     --message-range     ±N surrounding messages (default: 1)
+    --obs-char-limit    Truncate observations to N chars, 0=full (default: 500)
+    --retrieval-only    Skip LLM answering, report retrieval metrics only
     --judge             Strict judge: "openai" (optional)
-    --judge-model       Judge model (default: gpt-4o)
+    --judge-model       Judge model (default: gemini-3-flash-preview)
     --hypotheses        Re-score existing hypotheses (skip retrieval)
 ```
 
@@ -158,5 +173,6 @@ python-dotenv
 requests
 ```
 
+Optional for ColBERT retriever: `pylate`, `torch` (requires Python ≤3.12).
 Optional for Cohere embeddings: `CO_API_KEY` env var.
 Optional for local embeddings: `sentence-transformers`, `torch`.
