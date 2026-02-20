@@ -45,9 +45,15 @@ def main():
         print(f"Question {args.question_id} not found in dataset")
         return
 
-    # Load key message IDs from dataset if not overridden via CLI
+    # Load key message IDs from sidecar file if not overridden via CLI
     if key_ids is None:
-        dataset_keys = oracle.get("key_message_ids", [])
+        key_file = args.dataset.parent / "key_messages.json"
+        if key_file.exists():
+            with key_file.open() as f:
+                all_keys = json.load(f)
+            dataset_keys = all_keys.get(args.question_id, [])
+        else:
+            dataset_keys = oracle.get("key_message_ids", [])
         key_ids = set(dataset_keys) if dataset_keys else set()
 
     # Build message-id -> (text, session_id) lookup
