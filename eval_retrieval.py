@@ -1224,8 +1224,8 @@ def main():
                         help="Override output path")
     parser.add_argument("--judge", default=None,
                         help='Strict LongMemEval judge: "openai" for OpenAI API')
-    parser.add_argument("--judge-model", default="gemini-3-flash-preview",
-                        help="Model for strict judge (default: gemini-3-flash-preview)")
+    parser.add_argument("--judge-model", default="gemini-3.8-flash",
+                        help="Model for strict judge (default: gemini-3.8-flash)")
     parser.add_argument("--hypotheses", type=Path, default=None,
                         help="Re-score existing hypotheses file (skip retrieval)")
     parser.add_argument("--retrieval-only", action="store_true",
