@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
-"""Ask LongMemEval questions again on already imported endchat profiles, with zoom off and one
-search command in its place.
+"""Ask LongMemEval questions again on already imported endchat profiles, with a search command
+in place of zoom or beside it.
 
     python3 eval_endchat_tools.py --tool search --tag search133   # needs search_server.py running
     python3 eval_endchat_tools.py --tool sch --tag sch133
+    python3 eval_endchat_tools.py --tool search --zoom --tag searchzoom133
+    python3 eval_endchat_tools.py --tool search --zoom --excerpt --tag excerptzoom133
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
 
 Each profile under --base already holds the question and its answer from the run that built it.
 A copy is cut back to the messages before the question, so the turn sees the memory that run saw.
-The system prompt and the note sent with the question come from prompts/TOOL/.
+The system prompt and the note sent with the question come from prompts/NAME/, where NAME is the
+tool, with _zoom and _excerpt added for those options.
 
 Writes results/hypotheses_endchat_TAG.jsonl and results/endchat_stats_TAG.jsonl. The stats hold
-each call's token usage, each tool call with the dataset indexes of the messages it returned, and
-the share of the answer-bearing turns among them.
+each call's token usage, each tool call with the dataset indexes of the messages it returned, the
+messages zoom opened whole, and the share of the answer-bearing turns among all of those.
 """
 import argparse, concurrent.futures, json, shutil, subprocess, sys, threading
 from pathlib import Path
@@ -84,11 +87,12 @@ def run_question(q, args, lock, hyp_path, stats_path):
             role = "user" if m["kind"] == "user" else "assistant"
             content = m["text"] if role == "user" else [{"type": "text", "text": m["text"]}]
             f.write(json.dumps({"type": role, "timestamp": m["date"], "i": m["i"], "message": {"role": role, "content": content}}, ensure_ascii=False) + "\n")
-    prompts = HERE / "prompts" / args.tool
+    prompts = HERE / "prompts" / (args.tool + "_zoom" * args.zoom + "_excerpt" * args.excerpt)
+    (profile / "search_mode").write_text("excerpt" if args.excerpt else "whole")
     (profile / "config.toml").write_text(
         f'aop_bin = "{ee.AOP}"\nsystem_prompt = "{prompts / "system.md"}"\n'
         f'[compactor]\nmodel = "haiku"\neffort = "medium"\n'
-        f'[turn]\nmodel = "{args.turn_model}"\neffort = "{args.turn_effort}"\nzoom = false\n'
+        f'[turn]\nmodel = "{args.turn_model}"\neffort = "{args.turn_effort}"\nzoom = {str(args.zoom).lower()}\n'
         f"tail_note = {json.dumps((prompts / 'tail.txt').read_text().strip())}\n"
         f'[turn.commands]\n{args.tool} = "{COMMANDS[args.tool]}"\n'
     )
@@ -101,13 +105,20 @@ def run_question(q, args, lock, hyp_path, stats_path):
     tools = [json.loads(l) for l in calls_path.read_text().splitlines()] if calls_path.exists() else []
     for t in tools:
         t["ids"] = sorted({to_ds[i] for i in t["ids"]})
+    zoomed = set()
+    for m in read_log(profile)[n:]:
+        if m["kind"] == "tool" and m["text"].startswith("zoom "):
+            z = json.loads(m["text"][5:])
+            if z["n"] == 1 and z["id"] in to_ds:
+                zoomed.add(to_ds[z["id"]])
     ev = evidence(q)
-    seen = {i for t in tools for i in t["ids"]}
+    seen = {i for t in tools for i in t["ids"]} | zoomed
     stats = {
         "question_id": qid,
         "same_view": same_view,
         "turn_usage": [c["usage"] for c in ledger if c["kind"] == "turn" and c.get("usage")],
         "tool_calls": tools,
+        "zoomed": sorted(zoomed),
         "messages_returned": len(seen),
         "evidence_recall": len(seen & ev) / len(ev) if ev else None,
     }
@@ -125,6 +136,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--tool", choices=sorted(COMMANDS), required=True)
     p.add_argument("--tag", required=True)
+    p.add_argument("--zoom", action="store_true", help="leave zoom and date on beside the tool")
+    p.add_argument("--excerpt", action="store_true", help="search returns the matching sentences of long messages")
     p.add_argument("--base", type=Path, default=Path("/nvme/claude-tmp/lme_multib"))
     p.add_argument("--workdir", type=Path)
     p.add_argument("--dataset", type=Path, default=Path("data/longmemeval_s.json"))

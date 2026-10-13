@@ -1,49 +1,50 @@
 #!/usr/bin/env python3
 """Serve search over endchat profiles for eval_endchat_tools.py: rank a profile's messages with
-ColBERT-Zero and return the best ones whole.
+ColBERT-Zero and return the best ones, whole or cut to the sentences that match.
 
-    .venv/bin/python search_server.py [--port 8765]
+    .venv/bin/python search_server.py [--port 18765]
 
-POST / with {"profile": DIR, "query": TEXT} answers {"ids": [...], "text": ...}. A profile's
-messages are read from DIR/messages.jsonl and embedded on its first query. Messages are ranked as
-the "[role] content" strings embed_rank.py ranks, with the model's query and document prompts.
+POST / with {"profile": DIR, "query": TEXT, "mode": "whole" | "excerpt"} answers
+{"ids": [...], "text": ...}. A profile's messages are read from DIR/messages.jsonl and embedded on
+its first query, as the "[role] content" strings embed_rank.py ranks. Profiles with the same
+directory name hold the same chat and share one index. See excerpt.py for the ranking and the cut.
 """
 import argparse, json, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from pylate import models, rank
+import excerpt
 
-MODEL = "lightonai/ColBERT-Zero"
 TOP = 10
+SHARE, NEIGHBORS = 0.9, 1  # chosen on the single-session-assistant questions
 lock = threading.Lock()
 cache = {}
 
 
-def search(model, profile, query):
+def search(model, profile, query, mode):
     with lock:
-        if profile not in cache:
+        key = Path(profile).name
+        if key not in cache:
             msgs = [json.loads(l) for l in (Path(profile) / "messages.jsonl").read_text().splitlines()]
-            docs = [f"[{'user' if m['kind'] == 'user' else 'assistant'}] {m['text']}" for m in msgs]
-            cache[profile] = msgs, model.encode(docs, is_query=False, prompt_name="document", batch_size=32, show_progress_bar=False)
-        msgs, de = cache[profile]
-        qe = model.encode([query], is_query=True, prompt_name="query", batch_size=1, show_progress_bar=False)
-        out = rank.rerank(documents_ids=[list(range(len(msgs)))], queries_embeddings=qe, documents_embeddings=[de])
-    best = [msgs[e["id"]] for e in out[0][:TOP]]
-    return {"ids": [m["i"] for m in best], "text": "\n\n".join(f"{m['i']} | {m['date'][:10]} | {m['kind']}: {m['text']}" for m in best) + "\n"}
+            roles = ["user" if m["kind"] == "user" else "assistant" for m in msgs]
+            cache[key] = msgs, excerpt.Index(model, [f"[{r}] {m['text']}" for r, m in zip(roles, msgs)], [len(r) + 3 for r in roles])
+        msgs, index = cache[key]
+        hits, q = index.search(query, TOP)
+        shown = index.excerpts(hits, q, share=SHARE, neighbors=NEIGHBORS) if mode == "excerpt" else {k: msgs[k]["text"] for k in hits}
+    text = "\n\n".join(f"{msgs[k]['i']} | {msgs[k]['date'][:10]} | {msgs[k]['kind']}: {shown[k]}" for k in hits) + "\n"
+    return {"ids": [msgs[k]["i"] for k in hits], "text": text}
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", type=int, default=18765)
     a = ap.parse_args()
-    model = models.ColBERT(model_name_or_path=MODEL, device="cuda")
-    model.half()
+    model = excerpt.load()
 
     class Handler(BaseHTTPRequestHandler):
         def do_POST(self):
             req = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
-            body = json.dumps(search(model, req["profile"], req["query"])).encode()
+            body = json.dumps(search(model, req["profile"], req["query"], req.get("mode", "whole"))).encode()
             self.send_response(200)
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
@@ -52,7 +53,7 @@ def main():
         def log_message(self, *_):
             pass
 
-    print(f"serving {MODEL} on 127.0.0.1:{a.port}", flush=True)
+    print(f"serving {excerpt.MODEL} on 127.0.0.1:{a.port}", flush=True)
     ThreadingHTTPServer(("127.0.0.1", a.port), Handler).serve_forever()
 
 

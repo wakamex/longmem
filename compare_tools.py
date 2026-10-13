@@ -45,6 +45,9 @@ def main():
         "search, zoom off": (rows("results/endchat_stats_search133.jsonl"), "results/hypotheses_endchat_search133.eval.jsonl"),
         "sch, zoom off": (rows("results/endchat_stats_sch133.jsonl"), "results/hypotheses_endchat_sch133.eval.jsonl"),
     }
+    for name, tag in (("search with whole messages, zoom on", "searchzoom133"), ("search with excerpts, zoom on", "excerptzoom133")):
+        if Path(f"results/endchat_stats_{tag}.jsonl").exists():
+            runs[name] = (rows(f"results/endchat_stats_{tag}.jsonl"), f"results/hypotheses_endchat_{tag}.eval.jsonl")
     common = set.intersection(*(set(r) for r, _ in runs.values()))
     with_ev = [k for k in common if evidence(data[k])]
     base = None
@@ -60,6 +63,11 @@ def main():
         print(f"  model calls per turn: {S.mean(len(r[k]['turn_usage']) for k in common):.2f}")
         if name != "zoom":
             print(f"  tool calls per turn: {S.mean(len(r[k]['tool_calls']) for k in common):.2f}")
+            calls = [c for k in common for c in r[k]["tool_calls"]]
+            print(f"  characters returned per tool call: {S.mean(c['chars'] for c in calls):.0f}")
+        if any("zoomed" in r[k] for k in common):
+            z = [k for k in common if r[k].get("zoomed")]
+            print(f"  turns that also opened a message with zoom: {len(z)}/{len(common)}, {S.mean(len(r[k]['zoomed']) for k in z) if z else 0:.1f} messages each")
         print(f"  evidence recall: {S.mean(r[k]['evidence_recall'] for k in with_ev):.3f} over all, {S.mean(r[k]['evidence_recall'] for k in with_ev if k in used):.3f} over turns that called it")
         print(f"  messages returned per turn: {S.mean(r[k]['messages_returned'] for k in with_ev):.1f}")
         if label:
