@@ -9,6 +9,7 @@ in place of zoom or beside it.
     python3 eval_endchat_tools.py --tool search --reader --tag reader133
     python3 eval_endchat_tools.py --tool search --scout --tag scout133
     python3 eval_endchat_tools.py --tool none --tag none133
+    python3 eval_endchat_tools.py --tool sch --view 16000 8000 --tag sch_view16k
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
 
 Each profile under --base already holds the question and its answer from the run that built it.
@@ -80,8 +81,11 @@ def prepare(q, args, profile):
     shutil.rmtree(profile, ignore_errors=True)
     shutil.copytree(args.base / q["question_id"], profile, ignore=shutil.ignore_patterns(".aop", ".tmp"))
     asked = q["question"] + ee.ANSWER_SUFFIX
-    n = max(m["i"] for m in read_log(profile) if m["kind"] == "user" and m["text"] == asked)
-    same_view = rewind(profile, n)
+    if args.view:
+        n, same_view = small_view(q, args, profile), False
+    else:
+        n = max(m["i"] for m in read_log(profile) if m["kind"] == "user" and m["text"] == asked)
+        same_view = rewind(profile, n)
     hist = read_log(profile)
     (profile / "messages.jsonl").write_text("".join(json.dumps(m) + "\n" for m in hist))
     session = profile / "sch" / "projects" / "chat"
@@ -94,8 +98,34 @@ def prepare(q, args, profile):
     return n, same_view, log_to_dataset(q, hist)
 
 
+def small_view(q, args, profile):
+    """Replace the profile with one whose tree is built to the root, so that endchat can lay out a
+    view within --view bytes. The built tree is kept under --view-base and shared between runs."""
+    base = args.view_base / q["question_id"]
+    if not (base / "BUILT").exists():
+        shutil.rmtree(base, ignore_errors=True)
+        shutil.copytree(profile, base)
+        asked = q["question"] + ee.ANSWER_SUFFIX
+        rewind(base, max(m["i"] for m in read_log(base) if m["kind"] == "user" and m["text"] == asked))
+        (base / "view.json").unlink(missing_ok=True)
+        (base / "config.toml").write_text(f'aop_bin = "{ee.AOP}"\n[compactor]\nmodel = "haiku"\neffort = "medium"\n')
+        (base / "empty.json").write_text("[]")
+        # an import of nothing waits until every summary the log allows has been written
+        r = subprocess.run([str(args.endchat), "import", str(base), str(base / "empty.json"), "--timeout-secs", "1800"], capture_output=True, text=True)
+        done = json.loads(r.stdout.strip().splitlines()[-1])
+        if not done.get("complete"):
+            raise RuntimeError(f"summaries not built: {done}")
+        (base / "build.json").write_text(json.dumps(done))
+        (base / "BUILT").write_text("")
+    shutil.rmtree(profile)
+    shutil.copytree(base, profile, ignore=shutil.ignore_patterns(".aop", ".tmp", "lock", "ledger.jsonl", "view.json", "BUILT", "empty.json"))
+    return len(read_log(profile))
+
+
 def configure(profile, args, system, tail, model, effort, tool=None, zoom=False):
     commands = f'[turn.commands]\n{tool} = "{COMMANDS[tool]}"\n' if tool else ""
+    if args.view:  # after [turn.commands], a new table
+        commands += f"[limits]\nview_high = {args.view[0]}\nview_low = {args.view[1]}\n"
     (profile / "config.toml").write_text(
         f'aop_bin = "{ee.AOP}"\nsystem_prompt = "{system}"\n'
         f'[compactor]\nmodel = "haiku"\neffort = "medium"\n'
@@ -192,6 +222,8 @@ def main():
     p.add_argument("--zoom", action="store_true", help="leave zoom and date on beside the tool")
     p.add_argument("--excerpt", action="store_true", help="search returns the matching sentences of long messages")
     p.add_argument("--reader", action="store_true", help="Haiku reads each search's messages and passes on what it quotes")
+    p.add_argument("--view", type=int, nargs=2, metavar=("HIGH", "LOW"), help="bound the view to these bytes instead of endchat's 128000 and 64000")
+    p.add_argument("--view-base", type=Path, default=Path("/nvme/claude-tmp/lme_fulltree"), help="where profiles with a fully built tree are kept")
     p.add_argument("--scout", action="store_true", help="Haiku searches first and reports; the turn model answers in one call without tools")
     p.add_argument("--base", type=Path, default=Path("/nvme/claude-tmp/lme_multib"))
     p.add_argument("--workdir", type=Path)
