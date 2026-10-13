@@ -1,0 +1,1448 @@
+[
+ {
+  "question_id": "0a995998",
+  "question": "How many articles of apparel am I supposed to fetch from, or bring back to, a shop?",
+  "original": "How many items of clothing do I need to pick up or return from a store?",
+  "shared_words": [],
+  "original_shared_words": [
+   "clothing",
+   "items",
+   "need",
+   "pick",
+   "return",
+   "store"
+  ]
+ },
+ {
+  "question_id": "6d550036",
+  "question": "How many undertakings did I captain in the past, or do I captain right now?",
+  "original": "How many projects have I led or am currently leading?",
+  "shared_words": [],
+  "original_shared_words": [
+   "led",
+   "projects"
+  ]
+ },
+ {
+  "question_id": "gpt4_59c863d7",
+  "question": "How many miniature replica assembly sets have I acquired or been putting together in total?",
+  "original": "How many model kits have I worked on or bought?",
+  "shared_words": [],
+  "original_shared_words": [
+   "kits",
+   "model",
+   "worked"
+  ]
+ },
+ {
+  "question_id": "b5ef892d",
+  "question": "Altogether, how much time did I spend on tent-based outdoor getaways within America so far this calendar year?",
+  "original": "How many days did I spend on camping trips in the United States this year?",
+  "shared_words": [],
+  "original_shared_words": [
+   "camping",
+   "days",
+   "trips"
+  ]
+ },
+ {
+  "question_id": "e831120c",
+  "question": "Altogether, how much time did I say I spent sitting through every installment of the Avengers-style superhero saga plus the core entries of the space-fantasy saga?",
+  "original": "How many weeks did it take me to watch all the Marvel Cinematic Universe movies and the main Star Wars films?",
+  "shared_words": [],
+  "original_shared_words": [
+   "cinematic",
+   "films",
+   "main",
+   "marvel",
+   "movies",
+   "star",
+   "universe",
+   "wars",
+   "watch",
+   "weeks"
+  ]
+ },
+ {
+  "question_id": "3a704032",
+  "question": "How many pieces of indoor greenery have I brought home over the past thirty days or so?",
+  "original": "How many plants did I acquire in the last month?",
+  "shared_words": [],
+  "original_shared_words": [
+   "month",
+   "plants"
+  ]
+ },
+ {
+  "question_id": "gpt4_d84a3211",
+  "question": "Altogether, how much have I paid out for my bicycle since January, counting every purchase and repair?",
+  "original": "How much total money have I spent on bike-related expenses since the start of the year?",
+  "shared_words": [],
+  "original_shared_words": [
+   "bike"
+  ]
+ },
+ {
+  "question_id": "aae3761f",
+  "question": "What was the overall duration I spent behind the wheel to reach the trio of spots I journeyed to lately in my car?",
+  "original": "How many hours in total did I spend driving to my three road trip destinations combined?",
+  "shared_words": [],
+  "original_shared_words": [
+   "hours",
+   "road",
+   "trip"
+  ]
+ },
+ {
+  "question_id": "gpt4_f2262a51",
+  "question": "What was the total count of distinct medical practitioners I consulted with, according to what I told you?",
+  "original": "How many different doctors did I visit?",
+  "shared_words": [],
+  "original_shared_words": []
+ },
+ {
+  "question_id": "dd2973ad",
+  "question": "At what hour did I finally hit the sack the evening before I went to see my physician?",
+  "original": "What time did I go to bed on the day before I had a doctor's appointment?",
+  "shared_words": [],
+  "original_shared_words": [
+   "appointment",
+   "bed",
+   "doctor"
+  ]
+ },
+ {
+  "question_id": "c4a1ceb8",
+  "question": "How many distinct varieties of citrus produce have I featured in the boozy beverages we've talked about?",
+  "original": "How many different types of citrus fruits have I used in my cocktail recipes?",
+  "shared_words": [],
+  "original_shared_words": [
+   "cocktail",
+   "recipes"
+  ]
+ },
+ {
+  "question_id": "gpt4_a56e767c",
+  "question": "Across our earlier conversations, what's the total number of cinema-focused yearly gatherings I've been to?",
+  "original": "How many movie festivals that I attended?",
+  "shared_words": [],
+  "original_shared_words": [
+   "attended",
+   "festivals"
+  ]
+ },
+ {
+  "question_id": "6cb6f249",
+  "question": "What's the combined length of all the stretches when I abstained from those networking platforms?",
+  "original": "How many days did I take social media breaks in total?",
+  "shared_words": [],
+  "original_shared_words": [
+   "breaks",
+   "days",
+   "media",
+   "social"
+  ]
+ },
+ {
+  "question_id": "46a3abf7",
+  "question": "What's the total number of glass aquatic enclosures I own at present, counting the one I assembled for my buddy's child?",
+  "original": "How many tanks do I currently have, including the one I set up for my friend's kid?",
+  "shared_words": [],
+  "original_shared_words": [
+   "set",
+   "tanks"
+  ]
+ },
+ {
+  "question_id": "36b9f61e",
+  "question": "Altogether, how much cash did I lay out over the past few months on the extravagant, pricey pieces I told you about?",
+  "original": "What is the total amount I spent on luxury items in the past few months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "items",
+   "luxury"
+  ]
+ },
+ {
+  "question_id": "28dc39ac",
+  "question": "What is the combined amount of time I've logged across all the interactive entertainment titles I've mentioned to you?",
+  "original": "How many hours have I spent playing games in total?",
+  "shared_words": [],
+  "original_shared_words": [
+   "games",
+   "hours",
+   "playing",
+   "spent"
+  ]
+ },
+ {
+  "question_id": "gpt4_2f8be40d",
+  "question": "How many nuptial celebrations have I gone to so far in the current calendar year?",
+  "original": "How many weddings have I attended in this year?",
+  "shared_words": [],
+  "original_shared_words": [
+   "weddings"
+  ]
+ },
+ {
+  "question_id": "2e6d26dc",
+  "question": "Across the people close to me, how many infants have arrived lately?",
+  "original": "How many babies were born to friends and family members in the last few months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "babies",
+   "born",
+   "family",
+   "friends"
+  ]
+ },
+ {
+  "question_id": "gpt4_15e38248",
+  "question": "What's the total number of furnishings I've purchased, constructed, parted with for money, or mended over the recent stretch?",
+  "original": "How many pieces of furniture did I buy, assemble, sell, or fix in the past few months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "fix",
+   "furniture",
+   "months",
+   "sell"
+  ]
+ },
+ {
+  "question_id": "88432d0a",
+  "question": "How many distinct occasions during the recent fortnight did I prepare something edible by placing it inside a hot chamber?",
+  "original": "How many times did I bake something in the past two weeks?",
+  "shared_words": [],
+  "original_shared_words": [
+   "bake"
+  ]
+ },
+ {
+  "question_id": "80ec1f4f",
+  "question": "In February, how many different places that showcase collections of cultural treasures did I go to?",
+  "original": "How many different museums or galleries did I visit in the month of February?",
+  "shared_words": [],
+  "original_shared_words": [
+   "museums",
+   "visit"
+  ]
+ },
+ {
+  "question_id": "d23cf73b",
+  "question": "Over the past stretch of months, how many culinary traditions from around the globe did I either taste or become capable of preparing myself?",
+  "original": "How many different cuisines have I learned to cook or tried out in the past few months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "cook",
+   "learned",
+   "tried"
+  ]
+ },
+ {
+  "question_id": "gpt4_7fce9456",
+  "question": "How many listings did I tour before I tendered a purchase proposal on the terraced dwelling?",
+  "original": "How many properties did I view before making an offer on the townhouse in the Brookside neighborhood?",
+  "shared_words": [],
+  "original_shared_words": [
+   "brookside",
+   "neighborhood",
+   "offer",
+   "properties",
+   "townhouse",
+   "view"
+  ]
+ },
+ {
+  "question_id": "d682f1a2",
+  "question": "How many distinct companies that bring cooked dishes to my door have I turned to in the past little while?",
+  "original": "How many different types of food delivery services have I used recently?",
+  "shared_words": [],
+  "original_shared_words": [
+   "delivery",
+   "food",
+   "services"
+  ]
+ },
+ {
+  "question_id": "7024f17c",
+  "question": "How long in total did I spend on easy running and on stretching-based mindfulness exercise during the preceding seven-day period?",
+  "original": "How many hours of jogging and yoga did I do last week?",
+  "shared_words": [],
+  "original_shared_words": [
+   "hours",
+   "week",
+   "yoga"
+  ]
+ },
+ {
+  "question_id": "gpt4_5501fe77",
+  "question": "Which online app saw my audience expand the most during the latest lunar cycle?",
+  "original": "Which social media platform did I gain the most followers on over the past month?",
+  "shared_words": [],
+  "original_shared_words": [
+   "followers",
+   "gain",
+   "media",
+   "month",
+   "past",
+   "platform",
+   "social"
+  ]
+ },
+ {
+  "question_id": "gpt4_2ba83207",
+  "question": "Which seller of edibles received the largest total of my payments recently?",
+  "original": "Which grocery store did I spend the most money at in the past month?",
+  "shared_words": [],
+  "original_shared_words": [
+   "grocery",
+   "month"
+  ]
+ },
+ {
+  "question_id": "2318644b",
+  "question": "How much more did I pay for lodging each evening in Hawaii than in Japan's capital city?",
+  "original": "How much more did I spend on accommodations per night in Hawaii compared to Tokyo?",
+  "shared_words": [],
+  "original_shared_words": [
+   "night",
+   "per",
+   "tokyo"
+  ]
+ },
+ {
+  "question_id": "2ce6a0f2",
+  "question": "Over the previous four weeks, how many separate creativity-focused gatherings did I take part in?",
+  "original": "How many different art-related events did I attend in the past month?",
+  "shared_words": [],
+  "original_shared_words": [
+   "art",
+   "attend",
+   "events"
+  ]
+ },
+ {
+  "question_id": "gpt4_d12ceb0e",
+  "question": "What is the mean number of birthdays celebrated so far across our five-person lineage: the youngest of us, the couple who raised that one, and the couple above them?",
+  "original": "What is the average age of me, my parents, and my grandparents?",
+  "shared_words": [],
+  "original_shared_words": [
+   "age",
+   "parents"
+  ]
+ },
+ {
+  "question_id": "00ca467f",
+  "question": "How many times did I consult a health practitioner in the month right after February?",
+  "original": "How many doctor's appointments did I go to in March?",
+  "shared_words": [],
+  "original_shared_words": [
+   "appointments",
+   "march"
+  ]
+ },
+ {
+  "question_id": "b3c15d39",
+  "question": "How many days did I wait between buying that wireless camera-triggering gadget and having it show up at my door?",
+  "original": "How many days did it take for me to receive the new remote shutter release after I ordered it?",
+  "shared_words": [],
+  "original_shared_words": [
+   "new",
+   "ordered",
+   "release",
+   "remote",
+   "shutter"
+  ]
+ },
+ {
+  "question_id": "gpt4_31ff4165",
+  "question": "How many different pieces of medical equipment do I employ during a typical twenty-four-hour period?",
+  "original": "How many health-related devices do I use in a day?",
+  "shared_words": [],
+  "original_shared_words": [
+   "day",
+   "health"
+  ]
+ },
+ {
+  "question_id": "eeda8a6d",
+  "question": "How many finned pets do I have altogether across the pair of glass enclosures I told you about?",
+  "original": "How many fish are there in total in both of my aquariums?",
+  "shared_words": [],
+  "original_shared_words": [
+   "fish"
+  ]
+ },
+ {
+  "question_id": "2788b940",
+  "question": "In a typical week, how many instructor-led lessons do I go to in order to stay in shape?",
+  "original": "How many fitness classes do I attend in a typical week?",
+  "shared_words": [],
+  "original_shared_words": [
+   "classes",
+   "fitness"
+  ]
+ },
+ {
+  "question_id": "60bf93ed",
+  "question": "How long was the wait, counted in calendar dates, between ordering my rucksack for my notebook computer and its delivery to me?",
+  "original": "How many days did it take for my laptop backpack to arrive after I bought it?",
+  "shared_words": [],
+  "original_shared_words": [
+   "backpack",
+   "bought",
+   "days",
+   "laptop"
+  ]
+ },
+ {
+  "question_id": "9d25d4e0",
+  "question": "Over the past eight weeks or so, how many decorative accessories to wear did I come to own?",
+  "original": "How many pieces of jewelry did I acquire in the last two months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "jewelry",
+   "months"
+  ]
+ },
+ {
+  "question_id": "129d1232",
+  "question": "What was the combined amount of donations I gathered for good causes across all the benefit activities I took part in?",
+  "original": "How much money did I raise in total through all the charity events I participated in?",
+  "shared_words": [],
+  "original_shared_words": [
+   "charity",
+   "events",
+   "participated",
+   "raise"
+  ]
+ },
+ {
+  "question_id": "60472f9c",
+  "question": "Aside from my dissertation, how many assignments did I say I was handling at the same time?",
+  "original": "How many projects have I been working on simultaneously, excluding my thesis?",
+  "shared_words": [],
+  "original_shared_words": [
+   "projects",
+   "thesis",
+   "working"
+  ]
+ },
+ {
+  "question_id": "gpt4_194be4b3",
+  "question": "What's the total number of music-making items that I presently possess?",
+  "original": "How many musical instruments do I currently own?",
+  "shared_words": [],
+  "original_shared_words": []
+ },
+ {
+  "question_id": "a9f6b44c",
+  "question": "How many of my two-wheelers did I take in for a tune-up, or intend to take in for one, in the stretch right after February?",
+  "original": "How many bikes did I service or plan to service in March?",
+  "shared_words": [],
+  "original_shared_words": [
+   "march",
+   "plan"
+  ]
+ },
+ {
+  "question_id": "d851d5ba",
+  "question": "What's the overall amount in donations I collected for good causes across all the occasions I've told you about?",
+  "original": "How much money did I raise for charity in total?",
+  "shared_words": [],
+  "original_shared_words": [
+   "charity",
+   "raise"
+  ]
+ },
+ {
+  "question_id": "5a7937c8",
+  "question": "In the last month of the year, on how many separate occasions did I take part in religious events?",
+  "original": "How many days did I spend participating in faith-related activities in December?",
+  "shared_words": [],
+  "original_shared_words": [
+   "activities",
+   "december",
+   "faith",
+   "related"
+  ]
+ },
+ {
+  "question_id": "gpt4_ab202e7f",
+  "question": "How many things in my food-prep room did I swap out or mend?",
+  "original": "How many kitchen items did I replace or fix?",
+  "shared_words": [],
+  "original_shared_words": [
+   "fix",
+   "kitchen"
+  ]
+ },
+ {
+  "question_id": "gpt4_e05b82a6",
+  "question": "Counting every outing I went to from the seventh month through the tenth, what's the total number of laps I took on those fast, looping, track-based funfair machines?",
+  "original": "How many times did I ride rollercoasters across all the events I attended from July to October?",
+  "shared_words": [],
+  "original_shared_words": [
+   "events",
+   "july",
+   "october",
+   "rollercoasters",
+   "times"
+  ]
+ },
+ {
+  "question_id": "gpt4_731e37d7",
+  "question": "What was the combined cost of all the hands-on training sessions I went to over the previous four months?",
+  "original": "How much total money did I spend on attending workshops in the last four months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "attending",
+   "workshops"
+  ]
+ },
+ {
+  "question_id": "edced276",
+  "question": "Adding up my vacations to the Pacific archipelago state and to America's largest metropolis, how many full 24-hour periods was I away from home in all?",
+  "original": "How many days did I spend in total traveling in Hawaii and in New York City?",
+  "shared_words": [],
+  "original_shared_words": [
+   "city",
+   "days",
+   "hawaii",
+   "new",
+   "traveling",
+   "york"
+  ]
+ },
+ {
+  "question_id": "10d9b85a",
+  "question": "In the fourth month of the year, on how many separate calendar dates was I present at educational talks or training sessions?",
+  "original": "How many days did I spend attending workshops, lectures, and conferences in April?",
+  "shared_words": [],
+  "original_shared_words": [
+   "april",
+   "attending",
+   "days",
+   "workshops"
+  ]
+ },
+ {
+  "question_id": "e3038f8c",
+  "question": "Adding up all the scarce pieces I've mentioned owning across my various hobbies, what's the overall count?",
+  "original": "How many rare items do I have in total?",
+  "shared_words": [],
+  "original_shared_words": [
+   "rare"
+  ]
+ },
+ {
+  "question_id": "2b8f3739",
+  "question": "Altogether, how much revenue did I bring in from vending my goods at those various fairs and stalls I mentioned?",
+  "original": "What is the total amount of money I earned from selling my products at the markets?",
+  "shared_words": [],
+  "original_shared_words": [
+   "earned",
+   "markets",
+   "products",
+   "selling",
+   "total"
+  ]
+ },
+ {
+  "question_id": "1a8a66a6",
+  "question": "Right now, how many periodicals am I paying to receive on a recurring basis?",
+  "original": "How many magazine subscriptions do I currently have?",
+  "shared_words": [],
+  "original_shared_words": [
+   "magazine",
+   "subscriptions"
+  ]
+ },
+ {
+  "question_id": "c2ac3c61",
+  "question": "Altogether, how many web-based classes have I finished so far?",
+  "original": "How many online courses have I completed in total?",
+  "shared_words": [],
+  "original_shared_words": [
+   "completed",
+   "courses",
+   "online"
+  ]
+ },
+ {
+  "question_id": "bf659f65",
+  "question": "How many collections of recorded songs, whether full-length or short releases, have I acquired by paying for them or saving them to my device?",
+  "original": "How many music albums or EPs have I purchased or downloaded?",
+  "shared_words": [],
+  "original_shared_words": [
+   "albums",
+   "downloaded",
+   "music"
+  ]
+ },
+ {
+  "question_id": "gpt4_372c3eed",
+  "question": "Counting from when I began secondary-level studies until I finished my university diploma, how many annual cycles in total was I enrolled in formal classroom instruction?",
+  "original": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
+  "shared_words": [
+   "university"
+  ],
+  "original_shared_words": [
+   "bachelor",
+   "degree",
+   "high",
+   "school",
+   "years"
+  ]
+ },
+ {
+  "question_id": "gpt4_2f91af09",
+  "question": "Adding up everything I've finished since I got back into putting words on the page about twenty-one days ago, from tales and verse to my entries for the recurring online contest, what's my overall tally?",
+  "original": "How many total pieces of writing have I completed since I started writing again three weeks ago, including short stories, poems, and pieces for the writing challenge?",
+  "shared_words": [],
+  "original_shared_words": [
+   "challenge",
+   "including",
+   "poems",
+   "short",
+   "started",
+   "stories",
+   "weeks",
+   "writing"
+  ]
+ },
+ {
+  "question_id": "81507db6",
+  "question": "How many commencement events have I gone to during the most recent quarter-year?",
+  "original": "How many graduation ceremonies have I attended in the past three months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "attended",
+   "graduation",
+   "months"
+  ]
+ },
+ {
+  "question_id": "edced276_abs",
+  "question": "Altogether, how much time did I spend on my visits to Hawaii and to Seattle?",
+  "original": "How many days did I spend in total traveling in Hawaii and in Seattle?",
+  "shared_words": [],
+  "original_shared_words": [
+   "days"
+  ]
+ },
+ {
+  "question_id": "d3ab962e",
+  "question": "Adding it all up, how far did I travel on foot over the pair of outings during successive Saturday-and-Sunday breaks that I mentioned to you?",
+  "original": "What is the total distance of the hikes I did on two consecutive weekends?",
+  "shared_words": [],
+  "original_shared_words": [
+   "two",
+   "weekends"
+  ]
+ },
+ {
+  "question_id": "2311e44b",
+  "question": "How many sheets remain for me to get through in that historical novel about two sisters in wartime France that I am tackling lately?",
+  "original": "How many pages do I have left to read in 'The Nightingale'?",
+  "shared_words": [],
+  "original_shared_words": [
+   "nightingale",
+   "pages",
+   "read"
+  ]
+ },
+ {
+  "question_id": "cc06de0d",
+  "question": "By what amount did the cab I hired when I was running late exceed the price of my usual rail ticket?",
+  "original": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
+  "shared_words": [],
+  "original_shared_words": [
+   "commute",
+   "daily",
+   "fare",
+   "taxi",
+   "train"
+  ]
+ },
+ {
+  "question_id": "a11281a2",
+  "question": "Roughly how many more people joined my audience on that photo-sharing app over a fortnight of steady activity?",
+  "original": "What was the approximate increase in Instagram followers I experienced in two weeks?",
+  "shared_words": [],
+  "original_shared_words": [
+   "followers",
+   "increase",
+   "instagram",
+   "two",
+   "weeks"
+  ]
+ },
+ {
+  "question_id": "4f54b7c9",
+  "question": "In total, how many time-worn treasures have been handed down to me by my kin?",
+  "original": "How many antique items did I inherit or acquire from my family members?",
+  "shared_words": [],
+  "original_shared_words": [
+   "antique",
+   "family",
+   "inherit",
+   "items"
+  ]
+ },
+ {
+  "question_id": "85fa3a3f",
+  "question": "In all, how much did I pay for the fresh mealtime dish, the scoop for portioning meals, the oral-hygiene snacks, and the parasite-repelling neckwear I picked up for my pup?",
+  "original": "What is the total cost of the new food bowl, measuring cup, dental chews, and flea and tick collar I got for Max?",
+  "shared_words": [],
+  "original_shared_words": [
+   "bowl",
+   "chews",
+   "cup",
+   "dental",
+   "food",
+   "max",
+   "measuring",
+   "new"
+  ]
+ },
+ {
+  "question_id": "9aaed6a3",
+  "question": "How much money-back reward did I get from that supermarket chain on my visit the day before Friday?",
+  "original": "How much cashback did I earn at SaveMart last Thursday?",
+  "shared_words": [],
+  "original_shared_words": [
+   "cashback",
+   "earn",
+   "savemart",
+   "thursday"
+  ]
+ },
+ {
+  "question_id": "1f2b8d4f",
+  "question": "How much more did I pay for my pricey footwear than for the nearly identical ones I came across at the cheap shop?",
+  "original": "What is the difference in price between my luxury boots and the similar pair found at the budget store?",
+  "shared_words": [],
+  "original_shared_words": [
+   "boots",
+   "budget",
+   "found",
+   "luxury",
+   "pair",
+   "similar",
+   "store"
+  ]
+ },
+ {
+  "question_id": "e6041065",
+  "question": "As a percentage, how much of the footwear I took along on my most recent getaway did I actually put on?",
+  "original": "What percentage of packed shoes did I wear on my last trip?",
+  "shared_words": [],
+  "original_shared_words": [
+   "packed",
+   "shoes",
+   "trip",
+   "wear"
+  ]
+ },
+ {
+  "question_id": "51c32626",
+  "question": "On what day did I send in my scholarly manuscript about gauging the emotional tone of people's opinions?",
+  "original": "When did I submit my research paper on sentiment analysis?",
+  "shared_words": [],
+  "original_shared_words": [
+   "analysis",
+   "paper",
+   "research",
+   "sentiment"
+  ]
+ },
+ {
+  "question_id": "d905b33f",
+  "question": "By what percent was the cost reduced on the recent novel I bought by the writer I adore most?",
+  "original": "What percentage discount did I get on the book from my favorite author?",
+  "shared_words": [],
+  "original_shared_words": [
+   "author",
+   "book",
+   "discount",
+   "favorite"
+  ]
+ },
+ {
+  "question_id": "7405e8b1",
+  "question": "Was the proportional saving on my initial purchase from the boxed-ingredients subscription company bigger than the one on my initial purchase through the ride-hailing company's restaurant app?",
+  "original": "Did I receive a higher percentage discount on my first order from HelloFresh, compared to my first UberEats order?",
+  "shared_words": [],
+  "original_shared_words": [
+   "discount",
+   "first",
+   "hellofresh",
+   "order",
+   "ubereats"
+  ]
+ },
+ {
+  "question_id": "f35224e0",
+  "question": "Tallying everything I've gotten through from the audio program about the origins of startups and the humorous chat-based program about killings, what's the grand sum of installments?",
+  "original": "What is the total number of episodes I've listened to from 'How I Built This' and 'My Favorite Murder'?",
+  "shared_words": [],
+  "original_shared_words": [
+   "built",
+   "episodes",
+   "favorite",
+   "listened",
+   "murder"
+  ]
+ },
+ {
+  "question_id": "6456829e",
+  "question": "What was the combined number of seedlings I originally put in the soil for my red round fruit and my long green veggie crops?",
+  "original": "How many plants did I initially plant for tomatoes and cucumbers?",
+  "shared_words": [],
+  "original_shared_words": [
+   "cucumbers",
+   "initially",
+   "plant",
+   "plants",
+   "tomatoes"
+  ]
+ },
+ {
+  "question_id": "a4996e51",
+  "question": "How much total time do I put in on the job across a standard Monday-to-Sunday stretch when the promotional drives are at their most intense?",
+  "original": "How many hours do I work in a typical week during peak campaign seasons?",
+  "shared_words": [],
+  "original_shared_words": [
+   "campaign",
+   "during",
+   "hours",
+   "peak",
+   "seasons",
+   "week",
+   "work"
+  ]
+ },
+ {
+  "question_id": "3c1045c8",
+  "question": "How much longer have I been alive than the typical colleague on my team?",
+  "original": "How much older am I than the average age of employees in my department?",
+  "shared_words": [],
+  "original_shared_words": [
+   "age",
+   "average",
+   "department",
+   "employees"
+  ]
+ },
+ {
+  "question_id": "60036106",
+  "question": "Adding up the individuals who saw my paid promotion on Meta's blue social network and my partnership with a content creator on the photo-sharing app, how many were there in all?",
+  "original": "What was the total number of people reached by my Facebook ad campaign and Instagram influencer collaboration?",
+  "shared_words": [],
+  "original_shared_words": [
+   "campaign",
+   "facebook",
+   "influencer",
+   "instagram",
+   "people",
+   "reached"
+  ]
+ },
+ {
+  "question_id": "681a1674",
+  "question": "In our earlier chats, for how many of that famous comic-book studio's blockbuster features did I say I'd sat through a second viewing?",
+  "original": "How many Marvel movies did I re-watch?",
+  "shared_words": [],
+  "original_shared_words": [
+   "marvel",
+   "movies",
+   "watch"
+  ]
+ },
+ {
+  "question_id": "e25c3b8d",
+  "question": "What was the price reduction I enjoyed on the luxury purse I bought from that discount retailer?",
+  "original": "How much did I save on the designer handbag at TK Maxx?",
+  "shared_words": [],
+  "original_shared_words": [
+   "designer",
+   "handbag",
+   "maxx"
+  ]
+ },
+ {
+  "question_id": "4adc0475",
+  "question": "Adding together the times I put the ball in the net and the times I set up a teammate's strike in my casual amateur football competition held under a roof, what figure do I get?",
+  "original": "What is the total number of goals and assists I have in the recreational indoor soccer league?",
+  "shared_words": [],
+  "original_shared_words": [
+   "assists",
+   "goals",
+   "indoor",
+   "league",
+   "recreational",
+   "soccer"
+  ]
+ },
+ {
+  "question_id": "4bc144e2",
+  "question": "What was the combined amount I paid for my vehicle's cleaning and the fine for stopping it in a restricted zone?",
+  "original": "How much did I spend on car wash and parking ticket?",
+  "shared_words": [],
+  "original_shared_words": [
+   "car",
+   "parking",
+   "spend",
+   "ticket",
+   "wash"
+  ]
+ },
+ {
+  "question_id": "ef66a6e5",
+  "question": "How many different athletic disciplines did I previously take part in at a level where I faced rivals in organized contests?",
+  "original": "How many sports have I played competitively in the past?",
+  "shared_words": [],
+  "original_shared_words": [
+   "competitively",
+   "played"
+  ]
+ },
+ {
+  "question_id": "5025383b",
+  "question": "Which two pastimes got me to sign up for those internet groups where people swap tips?",
+  "original": "What are the two hobbies that led me to join online communities?",
+  "shared_words": [],
+  "original_shared_words": [
+   "communities",
+   "join",
+   "led",
+   "online"
+  ]
+ },
+ {
+  "question_id": "a1cc6108",
+  "question": "How many years had I lived when the protégé I'm coaching first came into the world?",
+  "original": "How old was I when Alex was born?",
+  "shared_words": [],
+  "original_shared_words": [
+   "alex"
+  ]
+ },
+ {
+  "question_id": "9ee3ecd6",
+  "question": "How much more do I have to accumulate in the rewards scheme at that beauty retailer before I can claim a complimentary face-care item?",
+  "original": "How many points do I need to earn to redeem a free skincare product at Sephora?",
+  "shared_words": [],
+  "original_shared_words": [
+   "earn",
+   "free",
+   "need",
+   "points",
+   "product",
+   "redeem",
+   "sephora",
+   "skincare"
+  ]
+ },
+ {
+  "question_id": "3fdac837",
+  "question": "Adding up my stays in the Land of the Rising Sun and in the Illinois metropolis, how many 24-hour periods did I spend across those two destinations altogether?",
+  "original": "What is the total number of days I spent in Japan and Chicago?",
+  "shared_words": [],
+  "original_shared_words": [
+   "chicago",
+   "days",
+   "japan"
+  ]
+ },
+ {
+  "question_id": "91b15a6e",
+  "question": "What's the lowest combined sum I could receive if I parted with both my old gemstone choker and my dressing table?",
+  "original": "What is the minimum amount I could get if I sold the vintage diamond necklace and the antique vanity?",
+  "shared_words": [],
+  "original_shared_words": [
+   "amount",
+   "diamond",
+   "necklace",
+   "vanity",
+   "vintage"
+  ]
+ },
+ {
+  "question_id": "27016adc",
+  "question": "The upgrade work I'm planning on my present home is what percent of the asking amount for that farmland I was eyeing out in the sticks?",
+  "original": "What percentage of the countryside property's price is the cost of the renovations I plan to do on my current house?",
+  "shared_words": [],
+  "original_shared_words": [
+   "cost",
+   "countryside",
+   "property",
+   "renovations"
+  ]
+ },
+ {
+  "question_id": "720133ac",
+  "question": "Altogether, how much did I spend on the animal doctor appointment for my furry companion and the bug-protection treatment I bought for her?",
+  "original": "What is the total cost of Lola's vet visit and flea medication?",
+  "shared_words": [],
+  "original_shared_words": [
+   "flea",
+   "lola",
+   "medication",
+   "vet"
+  ]
+ },
+ {
+  "question_id": "77eafa52",
+  "question": "By how much did what I ended up owing for my vacation exceed the first figure I was given?",
+  "original": "How much more did I have to pay for the trip after the initial quote?",
+  "shared_words": [],
+  "original_shared_words": [
+   "trip"
+  ]
+ },
+ {
+  "question_id": "8979f9ec",
+  "question": "Adding up everything from the poultry Tex-Mex wraps and the pulse-based broth dish I cooked, how many midday servings did I end up with altogether?",
+  "original": "What is the total number of lunch meals I got from the chicken fajitas and lentil soup?",
+  "shared_words": [],
+  "original_shared_words": [
+   "chicken",
+   "fajitas",
+   "lentil",
+   "lunch",
+   "meals",
+   "soup"
+  ]
+ },
+ {
+  "question_id": "0100672e",
+  "question": "What was the price per piece of the hot-beverage cups I bought for my teammates at the office?",
+  "original": "How much did I spend on each coffee mug for my coworkers?",
+  "shared_words": [],
+  "original_shared_words": [
+   "coffee",
+   "coworkers",
+   "mug",
+   "spend"
+  ]
+ },
+ {
+  "question_id": "a96c20ee",
+  "question": "At which institution did I exhibit my dissertation findings on a display board at a scholarly gathering?",
+  "original": "At which university did I present a poster on my thesis research?",
+  "shared_words": [],
+  "original_shared_words": [
+   "poster",
+   "present",
+   "research",
+   "thesis",
+   "university"
+  ]
+ },
+ {
+  "question_id": "92a0aa75",
+  "question": "What span of time have I spent in my present position?",
+  "original": "How long have I been working in my current role?",
+  "shared_words": [],
+  "original_shared_words": [
+   "working"
+  ]
+ },
+ {
+  "question_id": "3fe836c9",
+  "question": "By how much did the maximum loan my bank cleared me for in advance exceed what I ultimately paid for my new place?",
+  "original": "How much more was the pre-approval amount than the final sale price of the house?",
+  "shared_words": [],
+  "original_shared_words": [
+   "final",
+   "house",
+   "pre",
+   "price",
+   "sale"
+  ]
+ },
+ {
+  "question_id": "1c549ce4",
+  "question": "How much money did I shell out altogether for the rain-resistant shroud for my automobile and the polishing mist I bought for it?",
+  "original": "What is the total cost of the car cover and detailing spray I purchased?",
+  "shared_words": [],
+  "original_shared_words": [
+   "car",
+   "cost",
+   "cover",
+   "detailing",
+   "spray"
+  ]
+ },
+ {
+  "question_id": "6c49646a",
+  "question": "How far did I go altogether across all the car journeys I've mentioned to you?",
+  "original": "What is the total distance I covered in my four road trips?",
+  "shared_words": [],
+  "original_shared_words": [
+   "covered",
+   "road",
+   "total",
+   "trips"
+  ]
+ },
+ {
+  "question_id": "1192316e",
+  "question": "Altogether, how long do I spend on preparing myself and then traveling to my job?",
+  "original": "What is the total time it takes I to get ready and commute to work?",
+  "shared_words": [],
+  "original_shared_words": [
+   "commute",
+   "ready",
+   "takes",
+   "time",
+   "work"
+  ]
+ },
+ {
+  "question_id": "0ea62687",
+  "question": "How many more units of distance could my vehicle cover on one measure of petrol in town earlier this year than it can at the moment?",
+  "original": "How much more miles per gallon was my car getting a few months ago compared to now?",
+  "shared_words": [],
+  "original_shared_words": [
+   "car",
+   "gallon",
+   "getting",
+   "miles",
+   "months",
+   "per"
+  ]
+ },
+ {
+  "question_id": "67e0d0f2",
+  "question": "Altogether, how many internet-based classes have I wrapped up?",
+  "original": "What is the total number of online courses I've completed?",
+  "shared_words": [],
+  "original_shared_words": [
+   "completed",
+   "courses"
+  ]
+ },
+ {
+  "question_id": "bb7c3b45",
+  "question": "How much cheaper than the full sticker cost were the luxury stilettos I purchased at a discount shopping center?",
+  "original": "How much did I save on the Jimmy Choo heels?",
+  "shared_words": [],
+  "original_shared_words": [
+   "choo",
+   "heels",
+   "jimmy"
+  ]
+ },
+ {
+  "question_id": "ba358f49",
+  "question": "How old will I be when that buddy of mine I brought up ties the knot?",
+  "original": "How many years will I be when my friend Rachel gets married?",
+  "shared_words": [],
+  "original_shared_words": [
+   "friend",
+   "married",
+   "rachel",
+   "years"
+  ]
+ },
+ {
+  "question_id": "61f8c8f8",
+  "question": "By how much did I cut down my duration in the short race I jogged lately, compared with my effort twelve months earlier?",
+  "original": "How much faster did I finish the 5K run compared to my previous year's time?",
+  "shared_words": [],
+  "original_shared_words": [
+   "finish",
+   "run",
+   "year"
+  ]
+ },
+ {
+  "question_id": "60159905",
+  "question": "How many social gatherings centered on an evening meal did I go to during the preceding thirty days?",
+  "original": "How many dinner parties have I attended in the past month?",
+  "shared_words": [],
+  "original_shared_words": [
+   "attended",
+   "dinner",
+   "parties"
+  ]
+ },
+ {
+  "question_id": "ef9cf60a",
+  "question": "What was the combined amount I paid for presents I bought for my female sibling?",
+  "original": "How much did I spend on gifts for my sister?",
+  "shared_words": [],
+  "original_shared_words": [
+   "gifts",
+   "sister"
+  ]
+ },
+ {
+  "question_id": "73d42213",
+  "question": "When did I turn up at the health center on the day after Sunday?",
+  "original": "What time did I reach the clinic on Monday?",
+  "shared_words": [],
+  "original_shared_words": [
+   "clinic",
+   "monday",
+   "time"
+  ]
+ },
+ {
+  "question_id": "bc149d6b",
+  "question": "Altogether, how much did the fresh kinds of nourishment I got for my hens over the last couple of months weigh?",
+  "original": "What is the total weight of the new feed I purchased in the past two months?",
+  "shared_words": [],
+  "original_shared_words": [
+   "feed",
+   "purchased"
+  ]
+ },
+ {
+  "question_id": "099778bb",
+  "question": "What proportion of the senior management roles at my firm are held by females?",
+  "original": "What percentage of leadership positions do women hold in the my company?",
+  "shared_words": [],
+  "original_shared_words": [
+   "company",
+   "leadership",
+   "positions",
+   "women"
+  ]
+ },
+ {
+  "question_id": "09ba9854",
+  "question": "How much cheaper would it be to ride the rail line rather than hire a cab from where the planes land to where I'm staying?",
+  "original": "How much will I save by taking the train from the airport to my hotel instead of a taxi?",
+  "shared_words": [],
+  "original_shared_words": [
+   "airport",
+   "hotel",
+   "taking",
+   "taxi",
+   "train"
+  ]
+ },
+ {
+  "question_id": "d6062bb9",
+  "question": "What do I get if I add up how many times people watched my best-performing clips on the Google-owned streaming site and on the ByteDance short-clip app?",
+  "original": "What is the total number of views on my most popular videos on YouTube and TikTok?",
+  "shared_words": [],
+  "original_shared_words": [
+   "tiktok",
+   "videos",
+   "views",
+   "youtube"
+  ]
+ },
+ {
+  "question_id": "157a136e",
+  "question": "By how much does the age gap between me and my mother's mother, going by what I told you about our respective stages of life, come out in terms of full orbits around the sun?",
+  "original": "How many years older is my grandma than me?",
+  "shared_words": [],
+  "original_shared_words": [
+   "grandma"
+  ]
+ },
+ {
+  "question_id": "c18a7dc8",
+  "question": "By how many additional annual cycles of life have I accumulated now compared with the time I finished my undergraduate studies?",
+  "original": "How many years older am I than when I graduated from college?",
+  "shared_words": [],
+  "original_shared_words": [
+   "years"
+  ]
+ },
+ {
+  "question_id": "a3332713",
+  "question": "How much money in all did I lay out on presents for my colleague and my sibling?",
+  "original": "What is the total amount I spent on gifts for my coworker and brother?",
+  "shared_words": [],
+  "original_shared_words": [
+   "brother",
+   "coworker",
+   "gifts",
+   "spent",
+   "total"
+  ]
+ },
+ {
+  "question_id": "55241a1f",
+  "question": "If I add up the written responses people left under my latest real-time broadcast on Meta's networking site and under my top-performing clip on the big streaming site, what sum do I get?",
+  "original": "What is the total number of comments on my recent Facebook Live session and my most popular YouTube video?",
+  "shared_words": [],
+  "original_shared_words": [
+   "comments",
+   "facebook",
+   "live",
+   "popular",
+   "recent",
+   "session",
+   "video"
+  ]
+ },
+ {
+  "question_id": "a08a253f",
+  "question": "In a typical Monday-to-Sunday cycle, on how many separate calendar dates do I show up for my group exercise sessions?",
+  "original": "How many days a week do I attend fitness classes?",
+  "shared_words": [],
+  "original_shared_words": [
+   "attend",
+   "classes",
+   "days",
+   "fitness",
+   "week"
+  ]
+ },
+ {
+  "question_id": "f0e564bc",
+  "question": "What was the combined price I paid for the purse and the pricey face-care items I picked up?",
+  "original": "What is the total amount I spent on the designer handbag and high-end skincare products?",
+  "shared_words": [],
+  "original_shared_words": [
+   "end",
+   "handbag",
+   "high",
+   "products",
+   "skincare"
+  ]
+ },
+ {
+  "question_id": "078150f1",
+  "question": "By how much did the sum I collected at the philanthropic pedaling fundraiser exceed what I originally hoped to gather?",
+  "original": "How much more money did I raise than my initial goal in the charity cycling event?",
+  "shared_words": [],
+  "original_shared_words": [
+   "charity",
+   "cycling",
+   "event",
+   "goal",
+   "raise"
+  ]
+ },
+ {
+  "question_id": "8cf4d046",
+  "question": "What is the midpoint of the grade-point numbers I gave for my bachelor's studies and for the higher-level studies that came after?",
+  "original": "What is the average GPA of my undergraduate and graduate studies?",
+  "shared_words": [],
+  "original_shared_words": [
+   "gpa"
+  ]
+ },
+ {
+  "question_id": "a346bb18",
+  "question": "By how much did my finishing duration in that 26.2-mile race go beyond the goal I had set, counted in sixty-second units?",
+  "original": "How many minutes did I exceed my target time by in the marathon?",
+  "shared_words": [],
+  "original_shared_words": [
+   "marathon",
+   "minutes",
+   "target",
+   "time"
+  ]
+ },
+ {
+  "question_id": "37f165cf",
+  "question": "How many printed leaves in total did the two long prose stories I wrapped up in the first and third months of the year add up to?",
+  "original": "What was the page count of the two novels I finished in January and March?",
+  "shared_words": [],
+  "original_shared_words": [
+   "finished",
+   "novels",
+   "page"
+  ]
+ },
+ {
+  "question_id": "8e91e7d9",
+  "question": "Altogether, how many other kids did my mom and dad raise besides me?",
+  "original": "What is the total number of siblings I have?",
+  "shared_words": [],
+  "original_shared_words": []
+ },
+ {
+  "question_id": "87f22b4a",
+  "question": "How much money have I earned during the present calendar period from the hens' output that I've been handing off to the person next door?",
+  "original": "How much have I made from selling eggs this month?",
+  "shared_words": [],
+  "original_shared_words": [
+   "eggs",
+   "month",
+   "selling"
+  ]
+ },
+ {
+  "question_id": "e56a43b9",
+  "question": "How large a price reduction am I entitled to on my upcoming trip to that neighborhood food market where I've been collecting loyalty credits?",
+  "original": "How much discount will I get on my next purchase at FreshMart?",
+  "shared_words": [],
+  "original_shared_words": [
+   "discount",
+   "freshmart",
+   "next",
+   "purchase"
+  ]
+ },
+ {
+  "question_id": "efc3f7c2",
+  "question": "How much sooner does my alarm go off at the end of the work week than it does from Monday through Thursday?",
+  "original": "How much earlier do I wake up on Fridays compared to other weekdays?",
+  "shared_words": [],
+  "original_shared_words": [
+   "fridays",
+   "wake"
+  ]
+ },
+ {
+  "question_id": "21d02d0d",
+  "question": "How many casual jogging races did I skip early in the spring because of my job obligations?",
+  "original": "How many fun runs did I miss in March due to work commitments?",
+  "shared_words": [],
+  "original_shared_words": [
+   "commitments",
+   "due",
+   "fun",
+   "march",
+   "miss",
+   "runs",
+   "work"
+  ]
+ },
+ {
+  "question_id": "6456829e_abs",
+  "question": "At the very start, how many seedlings did I put in the soil for the round red fruits and the chili peppers I told you about?",
+  "original": "How many plants did I initially plant for tomatoes and chili peppers?",
+  "shared_words": [],
+  "original_shared_words": [
+   "initially",
+   "plant",
+   "plants",
+   "tomatoes"
+  ]
+ },
+ {
+  "question_id": "e5ba910e_abs",
+  "question": "How much money in total did I spend on the ear-worn audio gear I lately picked up along with the Apple tablet?",
+  "original": "What is the total cost of my recently purchased headphones and the iPad?",
+  "shared_words": [],
+  "original_shared_words": [
+   "cost",
+   "headphones",
+   "recently"
+  ]
+ },
+ {
+  "question_id": "09ba9854_abs",
+  "question": "What amount of money would I keep in my pocket by riding the coach rather than a cab from the place where planes land to my lodging?",
+  "original": "How much will I save by taking the bus from the airport to my hotel instead of a taxi?",
+  "shared_words": [],
+  "original_shared_words": [
+   "airport",
+   "hotel",
+   "taking",
+   "taxi"
+  ]
+ }
+]

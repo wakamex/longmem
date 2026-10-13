@@ -8,3 +8,4 @@ pylate/
 data/*.json
 !data/key_messages.json
 results/
+!data/reworded_multi_session.json

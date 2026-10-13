@@ -10,6 +10,7 @@ in place of zoom or beside it.
     python3 eval_endchat_tools.py --tool search --scout --tag scout133
     python3 eval_endchat_tools.py --tool none --tag none133
     python3 eval_endchat_tools.py --tool sch --view 16000 8000 --tag sch_view16k
+    python3 eval_endchat_tools.py --tool sch --questions data/reworded_multi_session.json --tag sch_reworded
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
 
 Each profile under --base already holds the question and its answer from the run that built it.
@@ -149,14 +150,15 @@ def turn_usage(profile):
 def run_question(q, args, lock, hyp_path, stats_path):
     qid = q["question_id"]
     profile = args.workdir / qid
-    asked = q["question"] + ee.ANSWER_SUFFIX
+    question = args.reworded.get(qid, q["question"])
+    asked = question + ee.ANSWER_SUFFIX
     n, same_view, to_ds = prepare(q, args, profile)
     side = []  # token usage of Haiku calls made for the turn model
     if args.scout:
         prompts = HERE / "prompts" / "scout"
         (profile / "search_mode").write_text("whole")
         configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), "haiku", "medium", tool=args.tool)
-        found = say(profile, args, q, q["question"])
+        found = say(profile, args, q, question)
         side = turn_usage(profile)
         searched = profile  # tool calls and zooms are read from the scout's profile
         profile = args.workdir / f"{qid}.answer"
@@ -224,6 +226,7 @@ def main():
     p.add_argument("--reader", action="store_true", help="Haiku reads each search's messages and passes on what it quotes")
     p.add_argument("--view", type=int, nargs=2, metavar=("HIGH", "LOW"), help="bound the view to these bytes instead of endchat's 128000 and 64000")
     p.add_argument("--view-base", type=Path, default=Path("/nvme/claude-tmp/lme_fulltree"), help="where profiles with a fully built tree are kept")
+    p.add_argument("--questions", type=Path, help="ask these rewordings (reword_questions.py) in place of the dataset's questions, and only them")
     p.add_argument("--scout", action="store_true", help="Haiku searches first and reports; the turn model answers in one call without tools")
     p.add_argument("--base", type=Path, default=Path("/nvme/claude-tmp/lme_multib"))
     p.add_argument("--workdir", type=Path)
@@ -238,6 +241,9 @@ def main():
     args = p.parse_args()
     args.workdir = args.workdir or Path(f"/nvme/claude-tmp/lme_{args.tag}")
     data = [q for q in json.loads(args.dataset.read_text()) if (args.base / q["question_id"]).is_dir()]
+    args.reworded = {r["question_id"]: r["question"] for r in json.loads(args.questions.read_text())} if args.questions else {}
+    if args.questions:
+        data = [q for q in data if q["question_id"] in args.reworded]
     if args.question_id:
         data = [q for q in data if q["question_id"] in args.question_id]
     data = data[: args.limit]
