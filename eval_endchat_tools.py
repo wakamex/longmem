@@ -6,18 +6,23 @@ in place of zoom or beside it.
     python3 eval_endchat_tools.py --tool sch --tag sch133
     python3 eval_endchat_tools.py --tool search --zoom --tag searchzoom133
     python3 eval_endchat_tools.py --tool search --zoom --excerpt --tag excerptzoom133
+    python3 eval_endchat_tools.py --tool search --reader --tag reader133
+    python3 eval_endchat_tools.py --tool search --scout --tag scout133
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
 
 Each profile under --base already holds the question and its answer from the run that built it.
 A copy is cut back to the messages before the question, so the turn sees the memory that run saw.
 The system prompt and the note sent with the question come from prompts/NAME/, where NAME is the
-tool, with _zoom and _excerpt added for those options.
+tool, with _zoom, _excerpt and _reader added for those options. With --reader, Claude Haiku reads
+each search's messages and passes on what it quotes. With --scout, Haiku takes the turn first with
+the search command and reports passages instead of answering, and the turn model then answers in
+one call without tools, from the view and that report (prompts/scout/).
 
 Writes results/hypotheses_endchat_TAG.jsonl and results/endchat_stats_TAG.jsonl. The stats hold
 each call's token usage, each tool call with the dataset indexes of the messages it returned, the
 messages zoom opened whole, and the share of the answer-bearing turns among all of those.
 """
-import argparse, concurrent.futures, json, shutil, subprocess, sys, threading
+import argparse, concurrent.futures, json, re, shutil, subprocess, sys, threading
 from pathlib import Path
 
 import eval_endchat as ee
@@ -69,16 +74,14 @@ def log_to_dataset(q, hist):
     return out
 
 
-def run_question(q, args, lock, hyp_path, stats_path):
-    qid = q["question_id"]
-    profile = args.workdir / qid
+def prepare(q, args, profile):
+    """A copy of the question's profile cut back to before the question, with the search inputs."""
     shutil.rmtree(profile, ignore_errors=True)
-    shutil.copytree(args.base / qid, profile, ignore=shutil.ignore_patterns(".aop", ".tmp"))
+    shutil.copytree(args.base / q["question_id"], profile, ignore=shutil.ignore_patterns(".aop", ".tmp"))
     asked = q["question"] + ee.ANSWER_SUFFIX
     n = max(m["i"] for m in read_log(profile) if m["kind"] == "user" and m["text"] == asked)
     same_view = rewind(profile, n)
     hist = read_log(profile)
-    to_ds = log_to_dataset(q, hist)
     (profile / "messages.jsonl").write_text("".join(json.dumps(m) + "\n" for m in hist))
     session = profile / "sch" / "projects" / "chat"
     session.mkdir(parents=True)
@@ -87,49 +90,98 @@ def run_question(q, args, lock, hyp_path, stats_path):
             role = "user" if m["kind"] == "user" else "assistant"
             content = m["text"] if role == "user" else [{"type": "text", "text": m["text"]}]
             f.write(json.dumps({"type": role, "timestamp": m["date"], "i": m["i"], "message": {"role": role, "content": content}}, ensure_ascii=False) + "\n")
-    prompts = HERE / "prompts" / (args.tool + "_zoom" * args.zoom + "_excerpt" * args.excerpt)
-    (profile / "search_mode").write_text("excerpt" if args.excerpt else "whole")
+    return n, same_view, log_to_dataset(q, hist)
+
+
+def configure(profile, args, system, tail, model, effort, tool=None, zoom=False):
+    commands = f'[turn.commands]\n{tool} = "{COMMANDS[tool]}"\n' if tool else ""
     (profile / "config.toml").write_text(
-        f'aop_bin = "{ee.AOP}"\nsystem_prompt = "{prompts / "system.md"}"\n'
+        f'aop_bin = "{ee.AOP}"\nsystem_prompt = "{system}"\n'
         f'[compactor]\nmodel = "haiku"\neffort = "medium"\n'
-        f'[turn]\nmodel = "{args.turn_model}"\neffort = "{args.turn_effort}"\nzoom = {str(args.zoom).lower()}\n'
-        f"tail_note = {json.dumps((prompts / 'tail.txt').read_text().strip())}\n"
-        f'[turn.commands]\n{args.tool} = "{COMMANDS[args.tool]}"\n'
+        f'[turn]\nmodel = "{model}"\neffort = "{effort}"\nzoom = {str(zoom).lower()}\n'
+        f"tail_note = {json.dumps(tail.strip(), ensure_ascii=False)}\n" + commands
     )
-    ask = subprocess.run([str(args.endchat), "say", str(profile), "--date", ee.iso(q["question_date"]), asked], capture_output=True, text=True)
-    if ask.returncode != 0:
-        print(f"[{qid}] say failed: {ask.stderr[-300:]}", file=sys.stderr, flush=True)
-        return
+
+
+def say(profile, args, q, text):
+    r = subprocess.run([str(args.endchat), "say", str(profile), "--date", ee.iso(q["question_date"]), text], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(f"say failed: {r.stderr[-300:]}")
+    return r.stdout.strip()
+
+
+def turn_usage(profile):
     ledger = [json.loads(l) for l in (profile / "ledger.jsonl").read_text().splitlines() if l.startswith("{")]
-    calls_path = profile / "tool_calls.jsonl"
+    return [c["usage"] for c in ledger if c["kind"] == "turn" and c.get("usage")]
+
+
+def run_question(q, args, lock, hyp_path, stats_path):
+    qid = q["question_id"]
+    profile = args.workdir / qid
+    asked = q["question"] + ee.ANSWER_SUFFIX
+    n, same_view, to_ds = prepare(q, args, profile)
+    side = []  # token usage of Haiku calls made for the turn model
+    if args.scout:
+        prompts = HERE / "prompts" / "scout"
+        (profile / "search_mode").write_text("whole")
+        configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), "haiku", "medium", tool=args.tool)
+        found = say(profile, args, q, q["question"])
+        side = turn_usage(profile)
+        searched = profile  # tool calls and zooms are read from the scout's profile
+        profile = args.workdir / f"{qid}.answer"
+        prepare(q, args, profile)
+        none = found.strip().lower().strip(".") in ("", "none")
+        tail = (prompts / "answer_tail_none.txt").read_text() if none else (prompts / "answer_tail.txt").read_text().format(found=found)
+        configure(profile, args, prompts / "answer_system.md", tail, args.turn_model, args.turn_effort)
+    else:
+        prompts = HERE / "prompts" / (args.tool + "_zoom" * args.zoom + "_excerpt" * args.excerpt + "_reader" * args.reader)
+        (profile / "search_mode").write_text("reader" if args.reader else "excerpt" if args.excerpt else "whole")
+        configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), args.turn_model, args.turn_effort, tool=args.tool, zoom=args.zoom)
+        searched = profile
+    answer = say(profile, args, q, asked)
+    calls_path = searched / "tool_calls.jsonl"
     tools = [json.loads(l) for l in calls_path.read_text().splitlines()] if calls_path.exists() else []
     for t in tools:
         t["ids"] = sorted({to_ds[i] for i in t["ids"]})
+        if "searched" in t:
+            t["searched"] = sorted({to_ds[i] for i in t["searched"]})
+        side += [t.pop("reader_usage")] if "reader_usage" in t else []
     zoomed = set()
-    for m in read_log(profile)[n:]:
+    for m in read_log(searched)[n:]:
         if m["kind"] == "tool" and m["text"].startswith("zoom "):
             z = json.loads(m["text"][5:])
             if z["n"] == 1 and z["id"] in to_ds:
                 zoomed.add(to_ds[z["id"]])
     ev = evidence(q)
     seen = {i for t in tools for i in t["ids"]} | zoomed
+    if args.scout:  # the answering model sees only the messages the scout quoted
+        quoted = {to_ds[int(i)] for i in re.findall(r"^(\d+) \|", found, re.M) if int(i) in to_ds}
+        searched_ids, seen = seen, seen & quoted
     stats = {
         "question_id": qid,
         "same_view": same_view,
-        "turn_usage": [c["usage"] for c in ledger if c["kind"] == "turn" and c.get("usage")],
+        "turn_usage": turn_usage(profile),
+        "side_usage": side,
         "tool_calls": tools,
         "zoomed": sorted(zoomed),
         "messages_returned": len(seen),
         "evidence_recall": len(seen & ev) / len(ev) if ev else None,
     }
+    if args.scout:
+        stats["scout_report_chars"] = len(found)
+        stats["searched_recall"] = len(searched_ids & ev) / len(ev) if ev else None
+    elif args.reader:
+        looked = {i for t in tools for i in t.get("searched", [])}
+        stats["searched_recall"] = len(looked & ev) / len(ev) if ev else None
     with lock:
         with hyp_path.open("a") as f:
-            f.write(json.dumps({"question_id": qid, "hypothesis": ask.stdout.strip()}) + "\n")
+            f.write(json.dumps({"question_id": qid, "hypothesis": answer}) + "\n")
         with stats_path.open("a") as f:
             f.write(json.dumps(stats) + "\n")
-    print(f"[{qid}] calls={len(tools)} recall={stats['evidence_recall']} {ask.stdout.strip()[:60]!r} (expected {str(q['answer'])[:40]!r})", flush=True)
+    print(f"[{qid}] calls={len(tools)} recall={stats['evidence_recall']} {answer[:60]!r} (expected {str(q['answer'])[:40]!r})", flush=True)
     if not args.keep:
         shutil.rmtree(profile, ignore_errors=True)
+        shutil.rmtree(searched, ignore_errors=True)
 
 
 def main():
@@ -138,6 +190,8 @@ def main():
     p.add_argument("--tag", required=True)
     p.add_argument("--zoom", action="store_true", help="leave zoom and date on beside the tool")
     p.add_argument("--excerpt", action="store_true", help="search returns the matching sentences of long messages")
+    p.add_argument("--reader", action="store_true", help="Haiku reads each search's messages and passes on what it quotes")
+    p.add_argument("--scout", action="store_true", help="Haiku searches first and reports; the turn model answers in one call without tools")
     p.add_argument("--base", type=Path, default=Path("/nvme/claude-tmp/lme_multib"))
     p.add_argument("--workdir", type=Path)
     p.add_argument("--dataset", type=Path, default=Path("data/longmemeval_s.json"))
