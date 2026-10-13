@@ -8,6 +8,7 @@ in place of zoom or beside it.
     python3 eval_endchat_tools.py --tool search --zoom --excerpt --tag excerptzoom133
     python3 eval_endchat_tools.py --tool search --reader --tag reader133
     python3 eval_endchat_tools.py --tool search --scout --tag scout133
+    python3 eval_endchat_tools.py --tool none --tag none133
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
 
 Each profile under --base already holds the question and its answer from the run that built it.
@@ -136,7 +137,7 @@ def run_question(q, args, lock, hyp_path, stats_path):
     else:
         prompts = HERE / "prompts" / (args.tool + "_zoom" * args.zoom + "_excerpt" * args.excerpt + "_reader" * args.reader)
         (profile / "search_mode").write_text("reader" if args.reader else "excerpt" if args.excerpt else "whole")
-        configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), args.turn_model, args.turn_effort, tool=args.tool, zoom=args.zoom)
+        configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), args.turn_model, args.turn_effort, tool=None if args.tool == "none" else args.tool, zoom=args.zoom)
         searched = profile
     answer = say(profile, args, q, asked)
     calls_path = searched / "tool_calls.jsonl"
@@ -186,7 +187,7 @@ def run_question(q, args, lock, hyp_path, stats_path):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--tool", choices=sorted(COMMANDS), required=True)
+    p.add_argument("--tool", choices=[*sorted(COMMANDS), "none"], required=True, help="none answers from the view in one call")
     p.add_argument("--tag", required=True)
     p.add_argument("--zoom", action="store_true", help="leave zoom and date on beside the tool")
     p.add_argument("--excerpt", action="store_true", help="search returns the matching sentences of long messages")
