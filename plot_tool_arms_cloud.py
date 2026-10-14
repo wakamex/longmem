@@ -109,7 +109,7 @@ def main():
             transform=ax.transAxes, fontsize=8, color=MUTED)
     fig.tight_layout()
     out = sys.argv[1] if len(sys.argv) > 1 else "results/tool_arms_cloud.png"
-    ax.text(1, 1.03, time.strftime("updated %Y-%m-%d %H:%M"), transform=ax.transAxes, ha="right", fontsize=7.5, color=MUTED)
+    ax.text(1, 1.075, time.strftime("updated %Y-%m-%d %H:%M"), transform=ax.transAxes, ha="right", fontsize=7.5, color=MUTED)
     fig.savefig(out, facecolor=SURFACE)
 
 
