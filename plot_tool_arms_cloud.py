@@ -83,8 +83,10 @@ def main():
         mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
         ax.scatter(mx, my, s=75, color=color, marker=marker, edgecolor=SURFACE, linewidth=1.5, zorder=3)
         share = front[tag] / DRAWS
-        dx, ha = (-12, "right") if tag == "reader133" else (12, "left")  # the reader and sch sit close together: label them on opposite sides
-        ax.annotate(f"{name}\non the frontier in {share:.0%} of draws", (mx, my), xytext=(dx, 0), textcoords="offset points",
+        # beside the mark by default; the reader and sch sit close together, so on opposite sides; the search scout's
+        # label would run into zoom's mark, so below its own
+        dx, dy, ha = {"reader133": (-12, 0, "right"), "scout133": (0, -24, "center")}.get(tag, (12, 0, "left"))
+        ax.annotate(f"{name}\non the frontier in {share:.0%} of draws", (mx, my), xytext=(dx, dy), textcoords="offset points",
                     fontsize=8.5, color=INK, va="center", ha=ha)
         print(f"{name:30s} cost ${mx:.4f} correct {my:.1f} frontier {share:.0%} runs {len(label_runs(tag))}")
     ax.set_xlim(0.030, 0.090)
