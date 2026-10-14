@@ -85,9 +85,9 @@ def main():
         ax.scatter(mx, my, s=75, color=color, marker=marker, edgecolor=SURFACE, linewidth=1.5, zorder=3)
         share = front[tag] / DRAWS
         # beside the mark by default; arms whose marks sit close together are labelled on opposite sides or above and below
-        dx, dy, ha = {"reader133": (-12, 0, "right"), "scout133": (0, 26, "center"), "scout_sch": (0, -26, "center"),
-                      "scout_zoom": (0, 26, "center"), "none133": (0, -26, "center")}.get(tag, (12, 0, "left"))
-        ax.annotate(f"{name}\non the frontier in {share:.0%} of draws", (mx, my), xytext=(dx, dy), textcoords="offset points",
+        dx, dy, ha = {"reader133": (-12, 0, "right"), "scout133": (0, 16, "center"), "scout_sch": (0, -16, "center"),
+                      "scout_zoom": (0, 16, "center"), "none133": (0, -16, "center")}.get(tag, (12, 0, "left"))
+        ax.annotate(f"{name} ({share:.0%})", (mx, my), xytext=(dx, dy), textcoords="offset points",
                     fontsize=8.5, color=INK, va="center", ha=ha)
         print(f"{name:30s} cost ${mx:.4f} correct {my:.1f} frontier {share:.0%} runs {len(label_runs(tag))}")
     ax.set_xlim(0.030, 0.090)
@@ -106,6 +106,7 @@ def main():
         ax.scatter([], [], s=55, color=color, marker="o", label=f"reads with {tool}" if tool != "none" else "reads nothing: summaries only")
     for marker, text in ROLES.values():
         ax.scatter([], [], s=55, color=MUTED, marker=marker, label=text)
+    ax.scatter([], [], s=0, label="(n%): share of draws in which the arm is on the efficient frontier")
     ax.legend(loc="lower right", fontsize=7.5, frameon=False, labelcolor=MUTED, ncol=1)
     runs = sorted(len(label_runs(t)) for t in arms)
     ax.text(0, 1.03, f"3,000 bootstrap draws per arm, {runs[0]} to {runs[-1]} runs each, 133 LongMemEval questions, answered by Sonnet 5.5",
