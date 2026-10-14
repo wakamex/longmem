@@ -39,12 +39,13 @@ ARMS = {  # tag: (name, tool, role)
     "reader133": ("search, Haiku reads results", "search", "reader"),
     "scout133": ("Haiku scouts with search", "search", "scout"), "scout_sch": ("Haiku scouts with sch", "sch", "scout"),
     "scout_zoom": ("Haiku scouts with zoom", "zoom", "scout"),
+    "sch_noview": ("sch, no view", "sch", "main"),
 }
 DRAWS, N = 3000, 133
 RECALL, RECALL_LOW, RECALL_HIGH = 0.0363, 0.0315, 0.0411  # share of my turns that reached into past sessions, 30 days to 2026-10-14
 
 
-def cost_runs(tag, first_side_call=False):
+def cost_runs(tag, first_side_call=False, first_call_only=False):
     """Each run's turns, with the first call's cached input counted as fresh, so that every run is
     priced as if it had started cold (replicates found the cache warm from the run before). With
     first_side_call, only the first of a turn's Haiku calls is counted."""
@@ -59,6 +60,8 @@ def cost_runs(tag, first_side_call=False):
             if v["turn_usage"]:
                 u = dict(v["turn_usage"][0]); u["cached_input_tokens"] = 0
                 v["turn_usage"] = [u] + v["turn_usage"][1:]
+            if first_call_only:
+                v["turn_usage"], v["side_usage"] = v["turn_usage"][:1], []
             if first_side_call:
                 v["side_usage"] = v.get("side_usage", [])[:1]
         out.append((c.turn_cost(r, False), c.turn_cost(r, True)))
@@ -69,6 +72,8 @@ def quiet_costs(tag):
     """Cost of a turn of this arm that needs no recall, per run."""
     if tag.startswith("scout"):  # the scout's first Haiku call and the main call
         return cost_runs(tag, first_side_call=True)
+    if tag == "sch_noview":  # a turn without the view or a tool call: priced from the no-view runs' first calls
+        return cost_runs(tag, first_call_only=True)
     return cost_runs("none_view16k" if tag == "sch_view16k" else "none133")
 
 

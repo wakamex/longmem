@@ -11,9 +11,9 @@ zero, or lies within MARGIN questions either way.
 import json, random, statistics as S
 from pathlib import Path
 
-from replicate_arms import ARMS
+from replicate_arms import ARMS, SIZE
 
-FIRST = {arm: f"results/hypotheses_endchat_{arm}.eval.jsonl" for arm in ARMS if arm not in ("zoom133", "scout_sch", "scout_zoom")}  # run 1, made under the same settings
+FIRST = {arm: f"results/hypotheses_endchat_{arm}.eval.jsonl" for arm in ARMS if arm not in ("zoom133", "scout_sch", "scout_zoom", "sch_noview", "sch_noview_reworded")}  # run 1, made under the same settings
 MARGIN, DRAWS = 3, 5000
 
 
@@ -23,7 +23,7 @@ def runs(arm):
     out = []
     for p in paths:
         lab = {json.loads(l)["question_id"]: json.loads(l)["label"] for l in open(p)}
-        if len(lab) == 133:
+        if len(lab) == SIZE[arm]:
             out.append(lab)
     return out
 

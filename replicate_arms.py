@@ -22,8 +22,11 @@ ARMS = {  # tag of replicate 1: arguments of eval_endchat_tools.py
     "sch_view16k": ["--tool", "sch", "--view", "16000", "8000"],
     "scout_sch": ["--tool", "sch", "--scout"],
     "scout_zoom": ["--tool", "zoom", "--scout"],
+    "sch_noview": ["--tool", "sch", "--no-view"],
+    "sch_reworded": ["--tool", "sch", "--questions", "data/reworded_multi_session.json"],
+    "sch_noview_reworded": ["--tool", "sch", "--no-view", "--questions", "data/reworded_multi_session.json"],
 }
-N = 133
+SIZE = {arm: 125 if "reworded" in arm else 133 for arm in ARMS}  # questions per run
 
 
 def done(tag):
@@ -35,10 +38,10 @@ def run(arm, n, jobs):
     tag = f"{arm}_r{n}"
     log = Path(f"/nvme/claude-tmp/lme-rep-{tag}.out")
     attempt = waits = 0
-    while done(tag) < N and attempt < 4 and waits < 18:
+    while done(tag) < SIZE[arm] and attempt < 4 and waits < 18:
         seen = log.stat().st_size if log.exists() else 0
         subprocess.run([sys.executable, "eval_endchat_tools.py", *ARMS[arm], "--tag", tag, "--jobs", str(jobs)], stdout=log.open("a"), stderr=subprocess.STDOUT)
-        if done(tag) >= N:
+        if done(tag) >= SIZE[arm]:
             break
         if any(w in log.read_text()[seen:] for w in ("session limit", "weekly limit")):  # the subscription window is used up: wait for it to reset
             waits += 1
@@ -46,8 +49,8 @@ def run(arm, n, jobs):
         else:
             attempt += 1
             time.sleep(120)
-    if done(tag) < N:
-        return tag, f"only {done(tag)} of {N} answered"
+    if done(tag) < SIZE[arm]:
+        return tag, f"only {done(tag)} of {SIZE[arm]} answered"
     env = dict(os.environ)
     for line in Path(".env").read_text().splitlines():
         if "=" in line and not line.startswith("#"):
@@ -66,7 +69,7 @@ def main():
     ap.add_argument("--jobs", type=int, default=4, help="questions at once within an arm")
     a = ap.parse_args()
     for n in range(a.first, a.last + 1):
-        arms = [arm for arm in a.arms if not Path(f"results/hypotheses_endchat_{arm}_r{n}.eval.jsonl").exists() or done(f"{arm}_r{n}") < N]
+        arms = [arm for arm in a.arms if not Path(f"results/hypotheses_endchat_{arm}_r{n}.eval.jsonl").exists() or done(f"{arm}_r{n}") < SIZE[arm]]
         with cf.ThreadPoolExecutor(a.parallel) as ex:
             for tag, result in ex.map(lambda arm: run(arm, n, a.jobs), arms):
                 print(time.strftime("%H:%M"), tag, result, flush=True)

@@ -12,6 +12,7 @@ in place of zoom or beside it.
     python3 eval_endchat_tools.py --tool none --tag none133
     python3 eval_endchat_tools.py --tool zoom --tag zoom133_r1
     python3 eval_endchat_tools.py --tool sch --view 16000 8000 --tag sch_view16k
+    python3 eval_endchat_tools.py --tool sch --no-view --tag sch_noview_r1
     python3 eval_endchat_tools.py --tool sch --questions data/reworded_multi_session.json --tag sch_reworded
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
 
@@ -127,6 +128,8 @@ def small_view(q, args, profile):
 
 def configure(profile, args, system, tail, model, effort, tool=None, zoom=False):
     commands = f'[turn.commands]\n{tool} = "{COMMANDS[tool]}"\n' if tool else ""
+    if args.no_view:
+        commands = "view = false\n" + commands  # still in [turn]
     if args.view:  # after [turn.commands], a new table
         commands += f"[limits]\nview_high = {args.view[0]}\nview_low = {args.view[1]}\n"
     (profile / "config.toml").write_text(
@@ -171,7 +174,7 @@ def run_question(q, args, lock, hyp_path, stats_path):
         tail = (prompts / "answer_tail_none.txt").read_text() if none else (prompts / "answer_tail.txt").read_text().format(found=found)
         configure(profile, args, prompts / "answer_system.md", tail, args.turn_model, args.turn_effort)
     else:
-        prompts = HERE / "prompts" / (args.tool + "_zoom" * (args.zoom and args.tool != "zoom") + "_excerpt" * args.excerpt + "_reader" * args.reader)
+        prompts = HERE / "prompts" / (args.tool + "_noview" * args.no_view + "_zoom" * (args.zoom and args.tool != "zoom") + "_excerpt" * args.excerpt + "_reader" * args.reader)
         (profile / "search_mode").write_text("reader" if args.reader else "excerpt" if args.excerpt else "whole")
         configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), args.turn_model, args.turn_effort, tool=args.tool if args.tool in COMMANDS else None, zoom=args.zoom or args.tool == "zoom")
         searched = profile
@@ -229,6 +232,7 @@ def main():
     p.add_argument("--zoom", action="store_true", help="leave zoom and date on beside the tool")
     p.add_argument("--excerpt", action="store_true", help="search returns the matching sentences of long messages")
     p.add_argument("--reader", action="store_true", help="Haiku reads each search's messages and passes on what it quotes")
+    p.add_argument("--no-view", action="store_true", help="send the question without the view; the chat is reachable only through the tool")
     p.add_argument("--view", type=int, nargs=2, metavar=("HIGH", "LOW"), help="bound the view to these bytes instead of endchat's 128000 and 64000")
     p.add_argument("--view-base", type=Path, default=Path("/nvme/claude-tmp/lme_fulltree"), help="where profiles with a fully built tree are kept")
     p.add_argument("--questions", type=Path, help="ask these rewordings (reword_questions.py) in place of the dataset's questions, and only them")
