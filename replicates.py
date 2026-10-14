@@ -45,18 +45,19 @@ def main():
     arms = {a: r for a, r in arms.items() if r}
     mean = {a: S.mean(sum(run.values()) for run in r) for a, r in arms.items()}
     boot = {a: draws(r, rng) for a, r in arms.items()}
-    order = sorted(arms, key=mean.get)
-    for a in order:
-        lo, hi = span(boot[a])
-        scores = [sum(run.values()) for run in arms[a]]
-        print(f"{a:12s} {len(scores):2d} runs  mean {mean[a]:6.1f}  95% {lo:6.1f} to {hi:6.1f}  runs: {' '.join(map(str, scores))}")
-    print()
-    for a, b in zip(order, order[1:]):
-        d = [y - x for x, y in zip(boot[a], boot[b])]
-        lo, hi = span(d)
-        state = "differ" if lo > 0 or hi < 0 else "equivalent" if -MARGIN <= lo and hi <= MARGIN else "open"
-        print(f"{b} minus {a}: {mean[b] - mean[a]:+.1f}  95% {lo:+.1f} to {hi:+.1f}  {state}")
-
+    for size in sorted({SIZE[a] for a in arms}, reverse=True):  # arms are compared only on the same questions
+        order = sorted((a for a in arms if SIZE[a] == size), key=mean.get)
+        print(f"\n{size} questions")
+        for a in order:
+            lo, hi = span(boot[a])
+            scores = [sum(run.values()) for run in arms[a]]
+            print(f"{a:20s} {len(scores):2d} runs  mean {mean[a]:6.1f}  95% {lo:6.1f} to {hi:6.1f}  runs: {' '.join(map(str, scores))}")
+        print()
+        for a, b in zip(order, order[1:]):
+            d = [y - x for x, y in zip(boot[a], boot[b])]
+            lo, hi = span(d)
+            state = "differ" if lo > 0 or hi < 0 else "equivalent" if -MARGIN <= lo and hi <= MARGIN else "open"
+            print(f"{b} minus {a}: {mean[b] - mean[a]:+.1f}  95% {lo:+.1f} to {hi:+.1f}  {state}")
 
 if __name__ == "__main__":
     main()
