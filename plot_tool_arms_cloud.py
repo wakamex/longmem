@@ -23,11 +23,15 @@ import compare_tools as c
 from replicates import runs as label_runs
 
 SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
-ARMS = {  # tag: (name, color)
-    "none133": ("no tool", "#2a78d6"), "zoom133": ("zoom", "#2a78d6"),
-    "scout133": ("Haiku scouts with search", "#1baf7a"), "scout_sch": ("Haiku scouts with sch", "#1baf7a"),
-    "scout_zoom": ("Haiku scouts with zoom", "#1baf7a"), "reader133": ("search, Haiku reads results", "#1baf7a"),
-    "sch133": ("sch", "#eb6834"), "sch_view16k": ("sch, small view", "#eb6834"),
+TOOLS = {"none": "#8a8985", "zoom": "#2a78d6", "sch": "#eb6834", "search": "#1baf7a"}  # color: the tool that reads old messages
+ROLES = {"main": ("o", "the main model reads"), "scout": ("^", "a Haiku scout reads first, the main model answers once"),
+         "reader": ("s", "the main model searches, Haiku condenses the results")}  # shape: who reads
+ARMS = {  # tag: (name, tool, role)
+    "none133": ("no tool", "none", "main"), "zoom133": ("zoom", "zoom", "main"),
+    "sch133": ("sch", "sch", "main"), "sch_view16k": ("sch, small view", "sch", "main"),
+    "reader133": ("search, Haiku reads results", "search", "reader"),
+    "scout133": ("Haiku scouts with search", "search", "scout"), "scout_sch": ("Haiku scouts with sch", "sch", "scout"),
+    "scout_zoom": ("Haiku scouts with zoom", "zoom", "scout"),
 }
 DRAWS, N = 3000, 133
 
@@ -72,11 +76,12 @@ def main():
                 front[t] += 1
     fig, ax = plt.subplots(figsize=(8.8, 5.8), dpi=160, facecolor=SURFACE)
     ax.set_facecolor(SURFACE)
-    for tag, (name, color) in arms.items():
+    for tag, (name, tool, role) in arms.items():
+        color, marker = TOOLS[tool], ROLES[role][0]
         xs, ys = zip(*cloud[tag])
         ax.scatter(xs, ys, s=3, color=color, alpha=0.06, linewidths=0, zorder=2)
         mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
-        ax.scatter(mx, my, s=60, color=color, edgecolor=SURFACE, linewidth=1.5, zorder=3)
+        ax.scatter(mx, my, s=75, color=color, marker=marker, edgecolor=SURFACE, linewidth=1.5, zorder=3)
         share = front[tag] / DRAWS
         dy = {"reader133": 16, "sch133": -16, "scout_zoom": -16, "scout_sch": 16}.get(tag, 0)
         ax.annotate(f"{name}\non the frontier in {share:.0%} of draws", (mx, my), xytext=(12, dy), textcoords="offset points",
@@ -94,12 +99,17 @@ def main():
         s.set_visible(False)
     ax.tick_params(colors=MUTED, labelsize=8.5, length=0)
     ax.set_title("Reading old messages in a never-ending chat: accuracy against cost", fontsize=12, color=INK, loc="left", pad=22)
+    for tool, color in TOOLS.items():
+        ax.scatter([], [], s=55, color=color, marker="o", label=f"reads with {tool}" if tool != "none" else "reads nothing: summaries only")
+    for marker, text in ROLES.values():
+        ax.scatter([], [], s=55, color=MUTED, marker=marker, label=text)
+    ax.legend(loc="lower right", fontsize=7.5, frameon=False, labelcolor=MUTED, ncol=1)
     runs = sorted(len(label_runs(t)) for t in arms)
-    ax.text(0, 1.03, f"Each cloud is 3,000 bootstrap draws over {runs[0]} to {runs[-1]} runs per arm on 133 multi-session LongMemEval questions, Claude Sonnet 5.5",
+    ax.text(0, 1.03, f"Each cloud is 3,000 bootstrap draws over {runs[0]} to {runs[-1]} runs per arm, 133 multi-session LongMemEval questions, Sonnet 5.5",
             transform=ax.transAxes, fontsize=8, color=MUTED)
     fig.tight_layout()
     out = sys.argv[1] if len(sys.argv) > 1 else "results/tool_arms_cloud.png"
-    ax.text(1, -0.11, time.strftime("updated %Y-%m-%d %H:%M"), transform=ax.transAxes, ha="right", fontsize=7.5, color=MUTED)
+    ax.text(1, 1.03, time.strftime("updated %Y-%m-%d %H:%M"), transform=ax.transAxes, ha="right", fontsize=7.5, color=MUTED)
     fig.savefig(out, facecolor=SURFACE)
 
 
