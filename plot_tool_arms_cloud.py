@@ -105,7 +105,7 @@ def main():
         ax.scatter([], [], s=55, color=MUTED, marker=marker, label=text)
     ax.legend(loc="lower right", fontsize=7.5, frameon=False, labelcolor=MUTED, ncol=1)
     runs = sorted(len(label_runs(t)) for t in arms)
-    ax.text(0, 1.03, f"Each cloud is 3,000 bootstrap draws over {runs[0]} to {runs[-1]} runs per arm on 133 multi-session LongMemEval questions, answered by Claude Sonnet 5.5",
+    ax.text(0, 1.03, f"3,000 bootstrap draws per arm, {runs[0]} to {runs[-1]} runs each, 133 LongMemEval questions, answered by Sonnet 5.5",
             transform=ax.transAxes, fontsize=8, color=MUTED)
     fig.tight_layout()
     out = sys.argv[1] if len(sys.argv) > 1 else "results/tool_arms_cloud.png"
