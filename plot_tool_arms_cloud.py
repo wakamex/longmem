@@ -39,7 +39,8 @@ DRAWS, N = 3000, 133
 def cost_runs(tag):
     """Each run's turns, with the first call's cached input counted as fresh, so that every run is
     priced as if it had started cold (replicates found the cache warm from the run before)."""
-    paths = ([] if tag == "zoom133" else [f"results/endchat_stats_{tag}.jsonl"]) + sorted(str(p) for p in Path("results").glob(f"endchat_stats_{tag}_r*.jsonl"))
+    first = f"results/endchat_stats_{tag}.jsonl"  # run 1 under the same settings, where it exists (not for zoom, whose run 1 used another harness)
+    paths = ([first] if tag != "zoom133" and Path(first).exists() else []) + sorted(str(p) for p in Path("results").glob(f"endchat_stats_{tag}_r*.jsonl"))
     out = []
     for p in paths:
         r = c.rows(p)
