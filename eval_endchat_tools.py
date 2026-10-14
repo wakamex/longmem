@@ -8,7 +8,9 @@ in place of zoom or beside it.
     python3 eval_endchat_tools.py --tool search --zoom --excerpt --tag excerptzoom133
     python3 eval_endchat_tools.py --tool search --reader --tag reader133
     python3 eval_endchat_tools.py --tool search --scout --tag scout133
+    python3 eval_endchat_tools.py --tool sch --scout --tag scout_sch_r1   # Haiku scouts with sch; also --tool zoom
     python3 eval_endchat_tools.py --tool none --tag none133
+    python3 eval_endchat_tools.py --tool zoom --tag zoom133_r1
     python3 eval_endchat_tools.py --tool sch --view 16000 8000 --tag sch_view16k
     python3 eval_endchat_tools.py --tool sch --questions data/reworded_multi_session.json --tag sch_reworded
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
@@ -156,8 +158,10 @@ def run_question(q, args, lock, hyp_path, stats_path):
     side = []  # token usage of Haiku calls made for the turn model
     if args.scout:
         prompts = HERE / "prompts" / "scout"
+        own = prompts if args.tool == "search" else HERE / "prompts" / f"scout_{args.tool}"  # the scout's system prompt and note
         (profile / "search_mode").write_text("whole")
-        configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), "haiku", "medium", tool=args.tool)
+        configure(profile, args, own / "system.md", (own / "tail.txt").read_text(), "haiku", "medium",
+                  tool=args.tool if args.tool in COMMANDS else None, zoom=args.tool == "zoom")
         found = say(profile, args, q, question)
         side = turn_usage(profile)
         searched = profile  # tool calls and zooms are read from the scout's profile
@@ -167,9 +171,9 @@ def run_question(q, args, lock, hyp_path, stats_path):
         tail = (prompts / "answer_tail_none.txt").read_text() if none else (prompts / "answer_tail.txt").read_text().format(found=found)
         configure(profile, args, prompts / "answer_system.md", tail, args.turn_model, args.turn_effort)
     else:
-        prompts = HERE / "prompts" / (args.tool + "_zoom" * args.zoom + "_excerpt" * args.excerpt + "_reader" * args.reader)
+        prompts = HERE / "prompts" / (args.tool + "_zoom" * (args.zoom and args.tool != "zoom") + "_excerpt" * args.excerpt + "_reader" * args.reader)
         (profile / "search_mode").write_text("reader" if args.reader else "excerpt" if args.excerpt else "whole")
-        configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), args.turn_model, args.turn_effort, tool=None if args.tool == "none" else args.tool, zoom=args.zoom)
+        configure(profile, args, prompts / "system.md", (prompts / "tail.txt").read_text(), args.turn_model, args.turn_effort, tool=args.tool if args.tool in COMMANDS else None, zoom=args.zoom or args.tool == "zoom")
         searched = profile
     answer = say(profile, args, q, asked)
     calls_path = searched / "tool_calls.jsonl"
@@ -219,7 +223,8 @@ def run_question(q, args, lock, hyp_path, stats_path):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--tool", choices=[*sorted(COMMANDS), "none"], required=True, help="none answers from the view in one call")
+    p.add_argument("--tool", choices=[*sorted(COMMANDS), "none", "zoom"], required=True,
+                   help="none answers from the view in one call; zoom is endchat as it ships, with its own prompt")
     p.add_argument("--tag", required=True)
     p.add_argument("--zoom", action="store_true", help="leave zoom and date on beside the tool")
     p.add_argument("--excerpt", action="store_true", help="search returns the matching sentences of long messages")
