@@ -89,7 +89,7 @@ def main():
         print(f"{name:30s} cost ${mx:.4f} correct {my:.1f} frontier {share:.0%} runs {len(label_runs(tag))}")
     ax.set_xlim(0.030, 0.090)
     ax.set_ylim(97, 118)
-    ax.set_xlabel("Cost per turn if Claude Opus 5.5 answered, one-hour prompt cache warm on 91% to 93% of turns (lower is better)", fontsize=9, color=MUTED)
+    ax.set_xlabel("Cost per turn if Claude Opus 5.5 answered, one-hour prompt cache warm on 92% (91 to 93%) of turns (lower is better)", fontsize=9, color=MUTED)
     ax.set_ylabel(f"Questions correct, of {N}, mean over runs (higher is better)", fontsize=9.5, color=MUTED)
     ax.xaxis.set_major_formatter(lambda x, _: f"${x:.2f}")
     ax.yaxis.set_major_formatter(lambda y, _: f"{y:.0f}  ({100 * y / N:.0f}%)")
