@@ -30,7 +30,7 @@ import compare_tools as c
 from replicates import runs as label_runs
 
 SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
-TOOLS = {"none": "#8a8985", "zoom": "#2a78d6", "sch": "#eb6834", "search": "#1baf7a"}  # color: the tool that reads old messages
+TOOLS = {"none": "#8a8985", "zoom": "#2a78d6", "sch": "#eb6834", "search": "#1baf7a", "full": "#3b3a37"}  # color: the tool that reads old messages
 ROLES = {"main": ("o", "the main model reads"), "scout": ("^", "a Haiku scout reads first, the main model answers once"),
          "reader": ("s", "the main model searches, Haiku condenses the results")}  # shape: who reads
 ARMS = {  # tag: (name, tool, role)
@@ -40,6 +40,7 @@ ARMS = {  # tag: (name, tool, role)
     "scout133": ("Haiku scouts with search", "search", "scout"), "scout_sch": ("Haiku scouts with sch", "sch", "scout"),
     "scout_zoom": ("Haiku scouts with zoom", "zoom", "scout"),
     "sch_noview": ("sch, no view", "sch", "main"),
+    "full133": ("whole history in context", "full", "main"),
 }
 DRAWS, N = 3000, 133
 RECALL, RECALL_LOW, RECALL_HIGH = 0.0363, 0.0315, 0.0411  # share of my turns that reached into past sessions, 30 days to 2026-10-14
@@ -70,6 +71,8 @@ def cost_runs(tag, first_side_call=False, first_call_only=False):
 
 def quiet_costs(tag):
     """Cost of a turn of this arm that needs no recall, per run."""
+    if tag == "full133":  # every turn is the same single call
+        return cost_runs(tag)
     if tag.startswith("scout"):  # the scout's first Haiku call and the main call
         return cost_runs(tag, first_side_call=True)
     if tag == "sch_noview":  # a turn without the view or a tool call: priced from the no-view runs' first calls
@@ -139,7 +142,7 @@ def main():
     ax.tick_params(colors=MUTED, labelsize=8.5, length=0)
     ax.set_title("Reading old messages in a never-ending chat: accuracy against cost", fontsize=12, color=INK, loc="left", pad=22)
     for tool, color in TOOLS.items():
-        ax.scatter([], [], s=55, color=color, marker="o", label=f"reads with {tool}" if tool != "none" else "reads nothing: summaries only")
+        ax.scatter([], [], s=55, color=color, marker="o", label={"none": "reads nothing: summaries only", "full": "reads the whole history, no summaries"}.get(tool, f"reads with {tool}"))
     for marker, text in ROLES.values():
         ax.scatter([], [], s=55, color=MUTED, marker=marker, label=text)
     ax.scatter([], [], s=0, label="(n%): share of draws in which the arm is on the efficient frontier")

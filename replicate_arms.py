@@ -23,6 +23,7 @@ ARMS = {  # tag of replicate 1: arguments of eval_endchat_tools.py
     "scout_sch": ["--tool", "sch", "--scout"],
     "scout_zoom": ["--tool", "zoom", "--scout"],
     "sch_noview": ["--tool", "sch", "--no-view"],
+    "full133": ["--tool", "full"],
     "sch_reworded": ["--tool", "sch", "--questions", "data/reworded_multi_session.json"],
     "sch_noview_reworded": ["--tool", "sch", "--no-view", "--questions", "data/reworded_multi_session.json"],
 }

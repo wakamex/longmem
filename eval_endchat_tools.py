@@ -13,6 +13,7 @@ in place of zoom or beside it.
     python3 eval_endchat_tools.py --tool zoom --tag zoom133_r1
     python3 eval_endchat_tools.py --tool sch --view 16000 8000 --tag sch_view16k
     python3 eval_endchat_tools.py --tool sch --no-view --tag sch_noview_r1
+    python3 eval_endchat_tools.py --tool full --tag full133_r1
     python3 eval_endchat_tools.py --tool sch --questions data/reworded_multi_session.json --tag sch_reworded
     python3 eval_retrieval.py --hypotheses results/hypotheses_endchat_search133.jsonl --judge openai
 
@@ -152,11 +153,41 @@ def turn_usage(profile):
     return [c["usage"] for c in ledger if c["kind"] == "turn" and c.get("usage")]
 
 
+def full_context(q, args, asked):
+    """One call with the whole chat in the prompt and no tools: the answer and the call's usage."""
+    chat = "".join(f"[{m['date'][:10]}] {m['kind']}: {m['text']}\n" for m in ee.history(q))
+    prompt = f"<chat>\n{chat}</chat>\n<state>\ndate: {ee.iso(q['question_date'])}\n</state>\n{asked}"
+    args.workdir.mkdir(parents=True, exist_ok=True)
+    path = args.workdir / f"{q['question_id']}.prompt.txt"
+    path.write_text(prompt)
+    try:
+        p = subprocess.run([ee.AOP, "run", "--agent", "claude", "--model", args.turn_model, "--effort", args.turn_effort, "--profile", "sealed",
+                            "--no-web", "--tools", "", "--system-prompt-file", str(HERE / "prompts" / "full" / "system.md"),
+                            "--prompt-file", str(path), "--timeout", "900", "--json"], capture_output=True, text=True, cwd=args.workdir)
+        r = json.loads(p.stdout)
+        if not r.get("succeeded"):
+            raise RuntimeError(f"run failed: {r.get('error')}")
+        subprocess.run([ee.AOP, "cleanup", r["run_id"]], capture_output=True, cwd=args.workdir)
+        return r["final_message"].strip(), r.get("usage") or {}
+    finally:
+        path.unlink(missing_ok=True)
+
+
 def run_question(q, args, lock, hyp_path, stats_path):
     qid = q["question_id"]
     profile = args.workdir / qid
     question = args.reworded.get(qid, q["question"])
     asked = question + ee.ANSWER_SUFFIX
+    if args.tool == "full":
+        answer, usage = full_context(q, args, asked)
+        with lock:
+            with hyp_path.open("a") as f:
+                f.write(json.dumps({"question_id": qid, "hypothesis": answer}) + "\n")
+            with stats_path.open("a") as f:
+                f.write(json.dumps({"question_id": qid, "turn_usage": [usage], "side_usage": [], "tool_calls": [], "zoomed": [],
+                                    "messages_returned": 0, "evidence_recall": None}) + "\n")
+        print(f"[{qid}] {answer[:60]!r} (expected {str(q['answer'])[:40]!r}) input {usage.get('input_tokens')}", flush=True)
+        return
     n, same_view, to_ds = prepare(q, args, profile)
     side = []  # token usage of Haiku calls made for the turn model
     if args.scout:
@@ -226,8 +257,8 @@ def run_question(q, args, lock, hyp_path, stats_path):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--tool", choices=[*sorted(COMMANDS), "none", "zoom"], required=True,
-                   help="none answers from the view in one call; zoom is endchat as it ships, with its own prompt")
+    p.add_argument("--tool", choices=[*sorted(COMMANDS), "none", "zoom", "full"], required=True,
+                   help="none answers from the view in one call; zoom is endchat as it ships, with its own prompt; full sends the whole chat in one call, without endchat")
     p.add_argument("--tag", required=True)
     p.add_argument("--zoom", action="store_true", help="leave zoom and date on beside the tool")
     p.add_argument("--excerpt", action="store_true", help="search returns the matching sentences of long messages")

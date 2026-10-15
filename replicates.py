@@ -13,7 +13,7 @@ from pathlib import Path
 
 from replicate_arms import ARMS, SIZE
 
-FIRST = {arm: f"results/hypotheses_endchat_{arm}.eval.jsonl" for arm in ARMS if arm not in ("zoom133", "scout_sch", "scout_zoom", "sch_noview", "sch_noview_reworded")}  # run 1, made under the same settings
+FIRST = {arm: f"results/hypotheses_endchat_{arm}.eval.jsonl" for arm in ARMS if arm not in ("zoom133", "scout_sch", "scout_zoom", "sch_noview", "sch_noview_reworded", "full133")}  # run 1, made under the same settings
 MARGIN, DRAWS = 3, 5000
 
 
@@ -39,7 +39,29 @@ def span(x):
     return x[int(0.025 * len(x))], x[int(0.975 * len(x))]
 
 
+def settled(arm):
+    """True when the arm's interval against each neighbor in score leaves out zero or lies within MARGIN."""
+    rng = random.Random(0)
+    arms = {a: r for a in ARMS if SIZE[a] == SIZE[arm] and (r := runs(a))}
+    if len(arms.get(arm, [])) < 3:
+        return False
+    mean = {a: S.mean(sum(run.values()) for run in r) for a, r in arms.items()}
+    order = sorted(arms, key=mean.get)
+    i = order.index(arm)
+    boot = {a: draws(arms[a], rng) for a in order[max(i - 1, 0):i + 2]}
+    for o in order[max(i - 1, 0):i + 2]:
+        if o == arm:
+            continue
+        lo, hi = span([y - x for x, y in zip(boot[o], boot[arm])])
+        if not (lo > 0 or hi < 0 or (-MARGIN <= lo and hi <= MARGIN)):
+            return False
+    return True
+
+
 def main():
+    import sys
+    if len(sys.argv) > 2 and sys.argv[1] == "--settled":
+        sys.exit(0 if settled(sys.argv[2]) else 1)
     rng = random.Random(0)
     arms = {a: runs(a) for a in ARMS}
     arms = {a: r for a, r in arms.items() if r}
