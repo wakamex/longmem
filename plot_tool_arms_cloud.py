@@ -34,7 +34,7 @@ TOOLS = {"none": "#8a8985", "zoom": "#2a78d6", "sch": "#eb6834", "search": "#1ba
 ROLES = {"main": ("o", "the main model reads"), "scout": ("^", "a Haiku scout reads first, the main model answers once"),
          "reader": ("s", "the main model searches, Haiku condenses the results")}  # shape: who reads
 VIEWS = {"sch_view16k": "small", "sch_noview": "none"}  # fill: how much of the summary view each turn carries; the rest carry all of it
-FILLS = {"full": ("full", "carries the full view of summaries"), "small": ("left", "carries a view cut to an eighth"),
+FILLS = {"full": ("full", "carries the full view of summaries, or the whole history"), "small": ("left", "carries a view cut to an eighth"),
          "none": ("none", "carries no view")}
 ARMS = {  # tag: (name, tool, role)
     "none133": ("no tool", "none", "main"), "zoom133": ("zoom", "zoom", "main"),
