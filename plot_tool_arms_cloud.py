@@ -120,20 +120,26 @@ def main():
         ax.scatter(mx, my, s=75, color=color, marker=marker, edgecolor=SURFACE, linewidth=1.5, zorder=3)
         share = front[tag] / DRAWS
         # beside the mark by default; arms whose marks sit close together are labelled on opposite sides or above and below
-        dx, dy, ha = {"reader133": (-12, 0, "right"), "scout133": (0, 16, "center"), "scout_sch": (0, -16, "center"),
-                      "scout_zoom": (0, 16, "center"), "none133": (0, -16, "center"),
-                      **({"zoom133": (-12, 0, "right")} if per_turn else {})}.get(tag, (12, 0, "left"))
+        # beside the mark by default; marks that sit close together are labelled on opposite sides, or above and below
+        dx, dy, ha = {"scout133": (0, 16, "center"), "scout_sch": (0, -16, "center"), "scout_zoom": (0, 16, "center"),
+                      "none133": (0, -16, "center"),
+                      **({"zoom133": (20, 0, "left")} if per_turn else {"zoom133": (-12, 0, "right"), "reader133": (-12, 0, "right")})}.get(tag, (12, 0, "left"))
         ax.annotate(f"{name} ({share:.0%})", (mx, my), xytext=(dx, dy), textcoords="offset points",
                     fontsize=8.5, color=INK, va="center", ha=ha)
         print(f"{name:30s} cost ${mx:.4f} correct {my:.1f} frontier {share:.0%} runs {len(label_runs(tag))}")
+    # costs span more than a factor of ten, so the axis is logarithmic: equal distances are equal ratios
     xs = sorted(x for pts in cloud.values() for x, _ in pts)
-    pad = (xs[-1] - xs[0]) * 0.08
-    ax.set_xlim(xs[0] - pad, xs[-1] + pad * 3)
+    ax.set_xscale("log")
+    right = xs[-1] * (3.2 if per_turn else 1.9)  # room for the legend
+    ax.set_xlim(xs[0] / 1.15, right)
+    ticks = [t for t in (0.01, 0.015, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1, 0.15, 0.2, 0.3, 0.5) if xs[0] / 1.15 <= t <= right]
+    ax.set_xticks(ticks)
+    ax.minorticks_off()
     ax.set_ylim(97, 118)
-    what = f"Cost of an average turn, {RECALL:.1%} of turns needing recall" if per_turn else "Cost of a turn that needs recall"
-    ax.set_xlabel(f"{what}, at Opus 5.5 prices, cache warm on 92±1% of turns (lower is better)", fontsize=9, color=MUTED)
+    what = f"Cost of an average turn ({RECALL:.1%} need recall)" if per_turn else "Cost of a turn that needs recall"
+    ax.set_xlabel(f"{what}, Opus 5.5 prices, cache warm on 92±1% of turns, log scale (lower is better)", fontsize=9, color=MUTED)
     ax.set_ylabel(f"Recall questions correct, of {N}, mean over runs (higher is better)", fontsize=9.5, color=MUTED)
-    ax.xaxis.set_major_formatter(lambda x, _: f"${x:.3f}")
+    ax.xaxis.set_major_formatter(lambda x, _: f"${x:.3f}".rstrip("0").rstrip(".") if x < 0.1 else f"${x:.2f}")
     ax.yaxis.set_major_formatter(lambda y, _: f"{y:.0f}  ({100 * y / N:.0f}%)")
     ax.grid(color=GRID, lw=0.7)
     ax.set_axisbelow(True)
@@ -146,13 +152,15 @@ def main():
     for marker, text in ROLES.values():
         ax.scatter([], [], s=55, color=MUTED, marker=marker, label=text)
     ax.scatter([], [], s=0, label="(n%): share of draws in which the arm is on the efficient frontier")
-    ax.legend(loc="upper left" if per_turn else "lower right", fontsize=7.5, frameon=False, labelcolor=MUTED, ncol=1)
+    # in an empty part of the chart: per turn, right of center below the whole history; per recall turn, the lower right corner
+    ax.legend(loc="center right" if per_turn else "lower right", bbox_to_anchor=(1, 0.38) if per_turn else None,
+              fontsize=7.5, frameon=False, labelcolor=MUTED, ncol=1)
     runs = sorted(len(label_runs(t)) for t in arms)
     ax.text(0, 1.03, f"3,000 bootstrap draws per arm, {runs[0]} to {runs[-1]} runs each, 133 LongMemEval questions, answered by Sonnet 5.5",
             transform=ax.transAxes, fontsize=8, color=MUTED)
     fig.tight_layout()
     out = argv[0] if argv else "results/tool_arms_cloud.png"
-    ax.text(1, 1.075, time.strftime("updated %Y-%m-%d %H:%M"), transform=ax.transAxes, ha="right", fontsize=7.5, color=MUTED)
+    fig.text(0.99, 0.99, time.strftime("updated %Y-%m-%d %H:%M"), ha="right", va="top", fontsize=7.5, color=MUTED)
     fig.savefig(out, facecolor=SURFACE)
 
 
