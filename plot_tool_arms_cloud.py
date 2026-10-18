@@ -33,6 +33,9 @@ SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
 TOOLS = {"none": "#8a8985", "zoom": "#2a78d6", "sch": "#eb6834", "search": "#1baf7a", "full": "#3b3a37"}  # color: the tool that reads old messages
 ROLES = {"main": ("o", "the main model reads"), "scout": ("^", "a Haiku scout reads first, the main model answers once"),
          "reader": ("s", "the main model searches, Haiku condenses the results")}  # shape: who reads
+VIEWS = {"sch_view16k": "small", "sch_noview": "none"}  # fill: how much of the summary view each turn carries; the rest carry all of it
+FILLS = {"full": ("full", "carries the full view of summaries"), "small": ("left", "carries a view cut to an eighth"),
+         "none": ("none", "carries no view")}
 ARMS = {  # tag: (name, tool, role)
     "none133": ("no tool", "none", "main"), "zoom133": ("zoom", "zoom", "main"),
     "sch133": ("sch", "sch", "main"), "sch_view16k": ("sch, small view", "sch", "main"),
@@ -117,7 +120,12 @@ def main():
         xs, ys = zip(*cloud[tag])
         ax.scatter(xs, ys, s=3, color=color, alpha=0.06, linewidths=0, zorder=2)
         mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
-        ax.scatter(mx, my, s=75, color=color, marker=marker, edgecolor=SURFACE, linewidth=1.5, zorder=3)
+        fill = FILLS[VIEWS.get(tag, "full")][0]
+        if fill == "full":
+            ax.scatter(mx, my, s=75, color=color, marker=marker, edgecolor=SURFACE, linewidth=1.5, zorder=3)
+        else:  # half-filled or hollow, outlined in the series color
+            ax.plot(mx, my, marker=marker, markersize=9, fillstyle=fill, color=color, markerfacecoloralt=SURFACE,
+                    markeredgecolor=color, markeredgewidth=2, linestyle="none", zorder=3)
         share = front[tag] / DRAWS
         # beside the mark by default; arms whose marks sit close together are labelled on opposite sides or above and below
         # beside the mark by default; marks that sit close together are labelled on opposite sides, or above and below
@@ -151,6 +159,9 @@ def main():
         ax.scatter([], [], s=55, color=color, marker="o", label={"none": "reads nothing: summaries only", "full": "reads the whole history, no summaries"}.get(tool, f"reads with {tool}"))
     for marker, text in ROLES.values():
         ax.scatter([], [], s=55, color=MUTED, marker=marker, label=text)
+    for fill, text in FILLS.values():
+        ax.plot([], [], marker="o", markersize=8, fillstyle=fill, color=MUTED, markerfacecoloralt=SURFACE, markeredgecolor=MUTED,
+                markeredgewidth=2 if fill != "full" else 0, linestyle="none", label=text)
     ax.scatter([], [], s=0, label="(n%): share of draws in which the arm is on the efficient frontier")
     # in an empty part of the chart: per turn, right of center below the whole history; per recall turn, the lower right corner
     ax.legend(loc="center right" if per_turn else "lower right", bbox_to_anchor=(1, 0.38) if per_turn else None,
