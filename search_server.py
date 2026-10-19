@@ -4,8 +4,9 @@ ColBERT-Zero and return the best ones, whole or cut to the sentences that match.
 
     .venv/bin/python search_server.py [--port 18765]
 
-POST / with {"profile": DIR, "query": TEXT, "mode": "whole" | "excerpt"} answers
-{"ids": [...], "text": ...}. A profile's messages are read from DIR/messages.jsonl and embedded on
+POST / with {"profile": DIR, "query": TEXT, "mode": "whole" | "excerpt", "k": N, "chars": C} answers
+{"ids": [...], "text": ...}: the k best messages (at most 200), and with chars, those that fit in C
+characters, best first, the first one cut if it alone is longer. A profile's messages are read from DIR/messages.jsonl and embedded on
 its first query, as the "[role] content" strings embed_rank.py ranks. Profiles with the same
 directory name hold the same chat and share one index. See excerpt.py for the ranking and the cut.
 """
@@ -21,7 +22,7 @@ lock = threading.Lock()
 cache = {}
 
 
-def search(model, profile, query, mode):
+def search(model, profile, query, mode, k=TOP, chars=None):
     with lock:
         key = Path(profile).name
         if key not in cache:
@@ -29,10 +30,16 @@ def search(model, profile, query, mode):
             roles = ["user" if m["kind"] == "user" else "assistant" for m in msgs]
             cache[key] = msgs, excerpt.Index(model, [f"[{r}] {m['text']}" for r, m in zip(roles, msgs)], [len(r) + 3 for r in roles])
         msgs, index = cache[key]
-        hits, q = index.search(query, TOP)
+        hits, q = index.search(query, k)
         shown = index.excerpts(hits, q, share=SHARE, neighbors=NEIGHBORS) if mode == "excerpt" else {k: msgs[k]["text"] for k in hits}
-    text = "\n\n".join(f"{msgs[k]['i']} | {msgs[k]['date'][:10]} | {msgs[k]['kind']}: {shown[k]}" for k in hits) + "\n"
-    return {"ids": [msgs[k]["i"] for k in hits], "text": text}
+    parts = [f"{msgs[k]['i']} | {msgs[k]['date'][:10]} | {msgs[k]['kind']}: {shown[k]}" for k in hits]
+    if chars:
+        n, used = 0, 0
+        while n < len(parts) and used + len(parts[n]) + 2 <= chars:
+            used += len(parts[n]) + 2
+            n += 1
+        hits, parts = (hits[:n], parts[:n]) if n else (hits[:1], [parts[0][:chars] + f" (cut at {chars} characters)"])
+    return {"ids": [msgs[k]["i"] for k in hits], "text": "\n\n".join(parts) + "\n"}
 
 
 def main():
@@ -44,7 +51,7 @@ def main():
     class Handler(BaseHTTPRequestHandler):
         def do_POST(self):
             req = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
-            body = json.dumps(search(model, req["profile"], req["query"], req.get("mode", "whole"))).encode()
+            body = json.dumps(search(model, req["profile"], req["query"], req.get("mode", "whole"), min(int(req.get("k", TOP)), 200), req.get("chars"))).encode()
             self.send_response(200)
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()

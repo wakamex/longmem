@@ -3,7 +3,9 @@
 
     search_tool.py PROFILE_DIR ARG
 
-PROFILE_DIR/search_mode, when present, holds "whole", "excerpt" or "reader". With "reader" the
+search("QUERY", k=N) returns the N best messages (at most 200); without k, PROFILE_DIR/search_k gives N, and 10 when
+it is absent. PROFILE_DIR/search_chars, when present, makes the default k 200 and keeps only the best messages
+that fit in that many characters. PROFILE_DIR/search_mode, when present, holds "whole", "excerpt" or "reader". With "reader" the
 whole messages go to Claude Haiku with the user's message, and what it quotes from them is printed
 instead (prompts/search_reader/reader_*.md). Each call is appended to PROFILE_DIR/tool_calls.jsonl
 with the ids of the messages shown, and for a reader call the ids searched and Haiku's token usage.
@@ -23,7 +25,7 @@ def read(profile, query, found):
     with tempfile.NamedTemporaryFile("w", dir=profile, suffix=".txt", delete=False) as f:
         f.write((PROMPTS / "reader_prompt.md").read_text().format(question=question, query=query, messages=found))
     try:
-        p = subprocess.run([aop, "run", "--agent", "claude", "--model", "haiku", "--effort", "medium", "--profile", "sealed", "--no-web",
+        p = subprocess.run([aop, "run", "--agent", "claude", "--model", (Path(profile, "reader_model").read_text().strip() if Path(profile, "reader_model").exists() else "haiku"), "--effort", "medium", "--profile", "sealed", "--no-web",
                             "--tools", "", "--system-prompt-file", str(PROMPTS / "reader_system.md"), "--prompt-file", f.name,
                             "--timeout", "300", "--json"], capture_output=True, text=True, cwd=profile)
         r = json.loads(p.stdout)
@@ -37,12 +39,19 @@ def read(profile, query, found):
 
 def main():
     profile, arg = sys.argv[1], sys.argv[2].strip()
+    k_file = os.path.join(profile, "search_k")
+    chars_file = os.path.join(profile, "search_chars")
+    chars = int(open(chars_file).read()) if os.path.exists(chars_file) else None
+    k = int(open(k_file).read()) if os.path.exists(k_file) else 200 if chars else 10
+    m = re.match(r"""^(.*?)\s*,\s*k\s*=\s*(\d+)$""", arg, re.S)
+    if m:
+        arg, k = m.group(1).strip(), min(int(m.group(2)), 200)
     query = arg[1:-1] if len(arg) > 1 and arg[0] == arg[-1] and arg[0] in "\"'" else arg
     if not query.strip():
-        sys.exit('usage: search("QUERY")')
+        sys.exit('usage: search("QUERY") or search("QUERY", k=N)')
     mode_file = os.path.join(profile, "search_mode")
     mode = open(mode_file).read().strip() if os.path.exists(mode_file) else "whole"
-    req = urllib.request.Request(URL, json.dumps({"profile": profile, "query": query, "mode": "whole" if mode == "reader" else mode}).encode(), {"Content-Type": "application/json"})
+    req = urllib.request.Request(URL, json.dumps({"profile": profile, "query": query, "mode": "whole" if mode == "reader" else mode, "k": k, "chars": chars}).encode(), {"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=300) as r:
         out = json.load(r)
     call = {"tool": "search", "arg": query, "ids": out["ids"]}
