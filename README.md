@@ -69,7 +69,7 @@ GPT-4o is now deprecated. Newer runs below use gemini-3-flash as judge.
 
 ### Judge change
 
-Strict-judge numbers above were scored with `gemini-3-flash-preview`. The default judge is now `gemini-3.8-flash`, which scores most runs differently: ColBERT-Zero k=50, ±1 goes from 119/133 to 113/133 and OAI small k=50, ±1 from 117/133 to 111/133. The earlier `om` runs move both ways, so their ranking changes: the terse prompt falls from 112/133 to 107/133, and k=100 and ±2 rise to 110/133 and 109/133. Every run re-judged is in [results/rejudge_j38/SUMMARY.md](results/rejudge_j38/SUMMARY.md). Compare numbers only when the same judge scored them.
+Strict-judge numbers above were scored with `gemini-3-flash-preview`. The default judge is now `gemini-3.8-flash`, which scores most runs differently: ColBERT-Zero k=50, ±1 goes from 119/133 to 113/133 and OAI small k=50, ±1 from 117/133 to 111/133. The earlier `om` runs move both ways, so their ranking changes: the terse prompt falls from 112/133 to 107/133, and k=100 and ±2 rise to 110/133 and 109/133. Compare numbers only when the same judge scored them.
 
 ### Retrieval Parameters (OAI small, gemini-3-flash answerer, obs=500)
 
