@@ -271,7 +271,7 @@ def main():
     p.add_argument("--base", type=Path, default=Path("/nvme/claude-tmp/lme_multib"))
     p.add_argument("--workdir", type=Path)
     p.add_argument("--dataset", type=Path, default=Path("data/longmemeval_s.json"))
-    p.add_argument("--endchat", type=Path, default=Path("/nvme/claude-tmp/endchat-search/target/release/endchat"))
+    p.add_argument("--endchat", type=Path, default=Path("/code/endchat/.worktrees/search-experiment/target/release/endchat"))
     p.add_argument("--question-id", action="append")
     p.add_argument("--limit", type=int)
     p.add_argument("--jobs", type=int, default=4)
